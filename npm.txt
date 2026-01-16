@@ -1,0 +1,35 @@
+npx create-next-app@latest .
+
+✔ Would you like to use TypeScript? → Yes
+✔ Would you like to use ESLint? → Yes
+✔ Would you like to use Tailwind CSS? → Yes
+✔ Would you like to use `src/` directory? → No (simpler for beginners)
+✔ Would you like to use App Router? → Yes
+✔ Would you like to customize the default import alias? → No
+
+npm install
+
+npm install jsonwebtoken bcrypt
+
+npm install -D @types/pg
+npm install jsonwebtoken bcryptjs cookie-parser
+npm install -D @types/jsonwebtoken
+
+
+npm install prisma @prisma/client
+npx prisma init
+npx prisma db pull
+npx prisma studio
+npx prisma generate
+
+generator client {
+  provider = "prisma-client-js"
+  
+}
+Change schema
+→ prisma migrate dev
+→ prisma generate
+→ restart TS server
+
+npm install @prisma/adapter-neon @neondatabase/serverless
+npm install prisma@6 @prisma/client@6

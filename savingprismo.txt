@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+  
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model cart_items {
+  id         BigInt    @id @default(autoincrement())
+  cart_id    BigInt?
+  product_id BigInt?
+  quantity   Int
+  carts      carts?    @relation(fields: [cart_id], references: [cart_id], onDelete: Cascade, onUpdate: NoAction)
+  products   products? @relation(fields: [product_id], references: [product_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([cart_id, product_id])
+}
+
+model carts {
+  cart_id    BigInt       @id @default(autoincrement())
+  user_id    BigInt?
+  session_id String?      @db.VarChar(100)
+  created_at DateTime?    @default(now()) @db.Timestamp(6)
+  cart_items cart_items[]
+  users      users?       @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "idx_cart_user")
+}
+
+model notifications {
+  id         BigInt    @id @default(autoincrement())
+  user_id    BigInt?
+  message    String?
+  is_read    Boolean?  @default(false)
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  users      users?    @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model order_items {
+  id                BigInt    @id @default(autoincrement())
+  order_id          BigInt?
+  product_id        BigInt?
+  price_at_purchase Decimal?  @db.Decimal(10, 2)
+  quantity          Int
+  orders            orders?   @relation(fields: [order_id], references: [order_id], onDelete: Cascade, onUpdate: NoAction)
+  products          products? @relation(fields: [product_id], references: [product_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model orders {
+  order_id       BigInt        @id @default(autoincrement())
+  user_id        BigInt?
+  status         String?       @default("PENDING") @db.VarChar(20)
+  payment_status String?       @default("UNPAID") @db.VarChar(20)
+  payment_method String?       @db.VarChar(50)
+  order_total    Decimal       @db.Decimal(10, 2)
+  currency       String?       @default("INR") @db.Char(3)
+  reference_id   String?       @db.VarChar(100)
+  created_at     DateTime?     @default(now()) @db.Timestamp(6)
+  order_items    order_items[]
+  users          users?        @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([user_id], map: "idx_orders_user")
+}
+
+model products {
+  product_id  BigInt        @id @default(autoincrement())
+  name        String        @db.VarChar(100)
+  slug        String        @unique @db.VarChar(120)
+  description String?
+  price       Decimal       @db.Decimal(10, 2)
+  stock       Int           @default(0)
+  image_url   String?
+  is_active   Boolean?      @default(true)
+  created_at  DateTime?     @default(now()) @db.Timestamp(6)
+  updated_at  DateTime?     @default(now()) @db.Timestamp(6)
+  cart_items  cart_items[]
+  order_items order_items[]
+  reviews     reviews[]
+  wishlist    wishlist[]
+
+  @@index([slug], map: "idx_products_slug")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model reviews {
+  id         BigInt    @id @default(autoincrement())
+  product_id BigInt?
+  user_id    BigInt?
+  rating     Int?
+  content    String?
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  products   products? @relation(fields: [product_id], references: [product_id], onDelete: Cascade, onUpdate: NoAction)
+  users      users?    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([product_id, user_id])
+  @@index([product_id], map: "idx_reviews_product")
+}
+
+model users {
+  user_id            BigInt          @id @default(autoincrement())
+  email              String          @unique @db.VarChar(255)
+  password_hash      String?
+  fullname           String?         @db.VarChar(100)
+  username           String?         @unique @db.VarChar(50)
+  google_id          String?         @db.VarChar(100)
+  role               String?         @default("USER")
+  is_email_verified  Boolean?        @default(false)
+  reset_token        String?
+  reset_token_expiry DateTime?       @db.Timestamp(6)
+  created_at         DateTime?       @default(now()) @db.Timestamp(6)
+  updated_at         DateTime?       @default(now()) @db.Timestamp(6)
+  carts              carts[]
+  notifications      notifications[]
+  orders             orders[]
+  reviews            reviews[]
+  wishlist           wishlist[]
+}
+
+model wishlist {
+  id         BigInt    @id @default(autoincrement())
+  user_id    BigInt?
+  product_id BigInt?
+  products   products? @relation(fields: [product_id], references: [product_id], onDelete: NoAction, onUpdate: NoAction)
+  users      users?    @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([user_id, product_id])
+}

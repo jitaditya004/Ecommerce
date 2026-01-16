@@ -1,0 +1,14 @@
+❌ @@index
+
+Performance optimization
+Not beginner level
+
+❌ @@unique composite keys
+
+Advanced constraints
+Learn later.
+
+❌ onDelete, onUpdate
+
+Cascade rules
+Good to know conceptually but not required to write now.

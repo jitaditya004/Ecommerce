@@ -1,0 +1,99 @@
+CREATE TABLE users (
+  user_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash TEXT,
+  fullname VARCHAR(100),
+  username VARCHAR(50) UNIQUE,
+  google_id VARCHAR(100),
+  role TEXT DEFAULT 'USER',
+  is_email_verified BOOLEAN DEFAULT FALSE,
+  reset_token TEXT,
+  reset_token_expiry TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE products (
+  product_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  slug VARCHAR(120) UNIQUE NOT NULL,
+  description TEXT,
+  price NUMERIC(10,2) NOT NULL,
+  stock INTEGER NOT NULL DEFAULT 0,
+  image_url TEXT,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE carts (
+  cart_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  user_id BIGINT REFERENCES users(user_id) ON DELETE CASCADE,
+  session_id VARCHAR(100),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE cart_items (
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  cart_id BIGINT REFERENCES carts(cart_id) ON DELETE CASCADE,
+  product_id BIGINT REFERENCES products(product_id),
+  quantity INTEGER NOT NULL CHECK (quantity > 0),
+  UNIQUE(cart_id, product_id)
+);
+
+
+CREATE TABLE orders (
+  order_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  user_id BIGINT REFERENCES users(user_id),
+  status VARCHAR(20) DEFAULT 'PENDING',
+  payment_status VARCHAR(20) DEFAULT 'UNPAID',
+  payment_method VARCHAR(50),
+  order_total NUMERIC(10,2) NOT NULL,
+  currency CHAR(3) DEFAULT 'INR',
+  reference_id VARCHAR(100),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE order_items (
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  order_id BIGINT REFERENCES orders(order_id) ON DELETE CASCADE,
+  product_id BIGINT REFERENCES products(product_id),
+  price_at_purchase NUMERIC(10,2),
+  quantity INTEGER NOT NULL
+);
+
+
+CREATE TABLE reviews (
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  product_id BIGINT REFERENCES products(product_id) ON DELETE CASCADE,
+  user_id BIGINT REFERENCES users(user_id) ON DELETE CASCADE,
+  rating INTEGER CHECK (rating BETWEEN 1 AND 5),
+  content TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(product_id, user_id)
+);
+
+
+CREATE INDEX idx_products_slug ON products(slug);
+CREATE INDEX idx_cart_user ON carts(user_id);
+CREATE INDEX idx_orders_user ON orders(user_id);
+CREATE INDEX idx_reviews_product ON reviews(product_id);
+
+
+CREATE TABLE notifications (
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  user_id BIGINT REFERENCES users(user_id),
+  message TEXT,
+  is_read BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE wishlist (
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  user_id BIGINT REFERENCES users(user_id),
+  product_id BIGINT REFERENCES products(product_id),
+  UNIQUE(user_id, product_id)
+);
+

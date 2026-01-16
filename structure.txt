@@ -1,0 +1,94 @@
+my-ecommerce/
+├── app/
+├── public/
+├── styles/
+├── lib/
+├── components/
+├── hooks/
+├── types/
+├── prisma/          (or db/)
+├── middleware.ts
+├── next.config.js
+├── tsconfig.json
+├── package.json
+└── .env
+
+
+
+
+
+
+
+
+app/
+├── layout.tsx
+├── page.tsx
+├── globals.css
+├── not-found.tsx
+├── loading.tsx
+├── error.tsx
+│
+├── auth/
+│   ├── login/
+│   │   └── page.tsx
+│   └── register/
+│       └── page.tsx
+│
+├── products/
+│   ├── page.tsx
+│   └── [slug]/
+│       └── page.tsx
+│
+├── cart/
+│   └── page.tsx
+│
+├── orders/
+│   └── page.tsx
+│
+└── api/
+    ├── auth/
+    │   └── route.ts
+    ├── products/
+    │   └── route.ts
+    └── cart/
+        └── route.ts
+
+
+
+
+components/
+├── Navbar.tsx
+├── Footer.tsx
+├── ProductCard.tsx
+├── SearchBar.tsx
+└── Banner.tsx
+
+
+
+
+lib/
+├── db.ts          // DB connection
+├── auth.ts        // JWT / session helpers
+├── fetcher.ts     // API helpers
+└── constants.ts
+
+db/
+├── schema.sql
+└── seed.sql
+
+hooks/
+├── useAuth.ts
+├── useCart.ts
+└── useDebounce.ts
+
+
+types/
+├── user.ts
+├── product.ts
+└── order.ts
+
+
+public/
+├── images/
+│   └── banner.png
+└── icons/

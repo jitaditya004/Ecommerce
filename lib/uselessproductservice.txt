@@ -1,0 +1,46 @@
+// lib/products.server.ts
+// import {pool} from "@/lib/db";
+// import { Product } from "@/types/product";
+
+// export async function getProductsFromDB(): Promise<Product[]> {
+//   const { rows } = await pool.query(`
+//     SELECT product_id, name, slug, description, price, stock, image_url
+//     FROM products
+//     WHERE is_active = true
+//     ORDER BY created_at DESC
+//   `);
+
+//   return rows;
+// }
+
+import "server-only";
+
+import { prisma } from "@/lib/prisma";
+import { Product } from "@/types/product";
+
+export async function getProductsFromDB(): Promise<Product[]> {
+  const products = await prisma.products.findMany({
+    where: {
+      is_active: true,
+    },
+    select: {
+      product_id: true,
+      name: true,
+      slug: true,
+      description: true,
+      price: true,
+      stock: true,
+      image_url: true,
+    },
+    orderBy: {
+      created_at: "desc",
+    },
+  });
+
+  return products.map((p) => ({
+    ...p,
+    product_id: Number(p.product_id),
+    price: Number(p.price),
+  }));
+}
+
