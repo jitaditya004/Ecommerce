@@ -60,7 +60,9 @@ export default function Navbar({ onToggleSearch }: NavbarProps) {
             🔍
           </button>
 
-          <button className="hover:scale-110 transition">🛒</button>
+          <Link href="/cart" className="hover:scale-110 transition">
+            🛒
+          </Link>
 
           {!user ? (
             <>

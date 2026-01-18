@@ -1,4 +1,5 @@
 import { Product } from "@/types/product";
+import AddToCartButton from "@/components/AddToCartButton";
 
 async function getProduct(slug: string) {
   const res = await fetch(
@@ -16,9 +17,9 @@ async function getProduct(slug: string) {
 export default async function ProductPage({
   params,
 }: {
-  params: { slug: string };
+    params: Promise<{ slug: string }>;
 }) {
-  const product: Product = await getProduct(params.slug);
+  const product: Product = await getProduct((await params).slug);
 
   return (
     <div className="px-10 py-16 max-w-5xl mx-auto grid grid-cols-2 gap-12">
@@ -46,12 +47,11 @@ export default async function ProductPage({
             : "Out of stock"}
         </p>
 
-        <button
+        <AddToCartButton
+          productId={product.product_id}
           disabled={product.stock === 0}
-          className="mt-6 bg-black text-white px-8 py-3 rounded-lg disabled:opacity-50"
-        >
-          Add to Cart
-        </button>
+        />
+
       </div>
 
     </div>

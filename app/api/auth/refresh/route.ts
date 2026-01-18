@@ -10,7 +10,7 @@ interface RefreshTokenPayload extends JwtPayload {
 
 
 export async function POST() {
-  const cookieStore = await cookies();
+  const cookieStore =await  cookies();
   const token = cookieStore.get("refresh")?.value;
 
   if (!token) {

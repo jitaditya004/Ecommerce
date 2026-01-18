@@ -27,7 +27,7 @@ export default function ProductCard({ product }: { product: Product }) {
         ₹{product.price}
       </p>
 
-      <Link className="mt-4 w-full bg-black text-white py-2 rounded-lg disabled:opacity-50" href={`/product/${product.slug}`}>
+      <Link className="mt-4 w-full bg-black text-white py-2 rounded-lg disabled:opacity-50" href={`/products/${product.slug}`}>
         View
       </Link>
 

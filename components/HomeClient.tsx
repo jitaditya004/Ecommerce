@@ -1,13 +1,11 @@
 "use client";
 
-import { useState } from "react";
-
 
 export default function HomeClient() {
   
 
   return (
-    <main className="h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <main className="h-screen bg-linear-to-br from-gray-50 to-gray-100">
       
 
       {/* Hero Section */}

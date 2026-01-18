@@ -5,11 +5,12 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   req: Request,
-  { params }: { params: { slug: string } }
+  context: { params: Promise<{ slug: string }> }
 ) {
+  const {slug}= await context.params;
   const product = await prisma.products.findUnique({
     where: {
-      slug: params.slug,
+      slug,
     },
     select: {
       product_id: true,
