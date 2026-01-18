@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
 
 const NAV_ITEMS = ["Home", "Collection", "About", "Contact"];
 
@@ -12,6 +15,7 @@ type NavbarProps = {
 export default function Navbar({ onToggleSearch }: NavbarProps) {
   const [active, setActive] = useState("Home");
   const { user, logout } = useAuth();
+  const pathname = usePathname();
 
   return (
     <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur border-b">
@@ -24,21 +28,30 @@ export default function Navbar({ onToggleSearch }: NavbarProps) {
 
         {/* Nav */}
         <div className="flex gap-8 text-sm">
-          {NAV_ITEMS.map((item) => (
-            <button
-              key={item}
-              onClick={() => setActive(item)}
-              className="relative text-gray-700 hover:text-black transition"
-            >
-              {item}
-              <span
-                className={`
-                  absolute left-0 -bottom-1 h-[2px] bg-black transition-all
-                  ${active === item ? "w-full" : "w-0"}
-                `}
-              />
-            </button>
-          ))}
+          {NAV_ITEMS.map((item) => {
+            const path =
+              item === "Home"
+                ? "/"
+                : `/${item.toLowerCase()}`;
+
+            const isActive = pathname === path;
+
+            return (
+              <Link
+                key={item}
+                href={path}
+                className="relative cursor-pointer"
+              >
+                {item}
+
+                <span
+                  className={`absolute left-0 -bottom-1 h-[2px] bg-black transition-all
+                    ${isActive ? "w-full" : "w-0"}
+                  `}
+                />
+              </Link>
+            );
+          })}
         </div>
 
         {/* Actions */}

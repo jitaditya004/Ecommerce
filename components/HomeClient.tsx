@@ -1,16 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import Navbar from "@/components/Navbar";
-import SearchBar from "@/components/SearchBar";
+
 
 export default function HomeClient() {
-  const [showSearch, setShowSearch] = useState(false);
+  
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <Navbar onToggleSearch={() => setShowSearch(p => !p)} />
-      <SearchBar visible={showSearch} />
+    <main className="h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      
 
       {/* Hero Section */}
       <section className="px-10 pt-20 pb-24 text-center">

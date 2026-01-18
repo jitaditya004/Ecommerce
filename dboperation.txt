@@ -1,0 +1,21 @@
+INSERT INTO products (name, slug, description, price, stock, image_url)
+VALUES
+('Wireless Headphones', 'wireless-headphones', 'Bluetooth noise cancelling headphones', 2999.00, 20, 'https://picsum.photos/id/180/600/600'),
+
+('Smart Watch', 'smart-watch', 'Fitness tracking smart watch', 4999.00, 15, 'https://picsum.photos/id/1/600/600'),
+
+('Gaming Mouse', 'gaming-mouse', 'RGB wired gaming mouse', 1299.00, 30, 'https://picsum.photos/id/1080/600/600'),
+
+('Mechanical Keyboard', 'mechanical-keyboard', 'Backlit mechanical keyboard', 3499.00, 25, 'https://picsum.photos/id/1062/600/600'),
+
+('Laptop Backpack', 'laptop-backpack', 'Waterproof laptop backpack', 1899.00, 40, 'https://picsum.photos/id/1011/600/600'),
+
+('Bluetooth Speaker', 'bluetooth-speaker', 'Portable bluetooth speaker', 2499.00, 18, 'https://picsum.photos/id/1084/600/600'),
+
+('DSLR Camera', 'dslr-camera', 'Professional DSLR camera', 45999.00, 8, 'https://picsum.photos/id/250/600/600'),
+
+('Office Chair', 'office-chair', 'Ergonomic office chair', 8999.00, 12, 'https://picsum.photos/id/20/600/600'),
+
+('Running Shoes', 'running-shoes', 'Lightweight running shoes', 3999.00, 35, 'https://picsum.photos/id/21/600/600'),
+
+('Smartphone', 'smartphone', 'Latest Android smartphone', 19999.00, 10, 'https://picsum.photos/id/160/600/600');
