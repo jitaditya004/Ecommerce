@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 type CartItem = {
   id: number;
   quantity: number;
-  product: {
+  products: {
     name: string;
     price: number;
     image_url: string | null;
@@ -18,21 +18,35 @@ export default function CartPage() {
   const [items, setItems] = useState<CartItem[]>([]);
   const [fetching, setFetching] = useState(true);
 
-  useEffect(() => {
-    if (!user) {
-      setFetching(false);
-      return;
-    }
+const userId = user?.id;
 
-    fetch("/api/cart", {
-      credentials: "include",
+useEffect(() => {
+  if (!userId) return;
+
+  let active = true;
+
+  fetch("/api/cart", {
+    credentials: "include",
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (!active) return;
+
+      setItems(data);
+      setFetching(false);
     })
-      .then((res) => res.json())
-      .then((data) => {
-        setItems(data);
-        setFetching(false);
-      });
-  }, [user]);
+    .catch(() => {
+      if (!active) return;
+      setFetching(false);
+    });
+
+  return () => {
+    active = false;
+  };
+
+}, [userId]);
+
+
 
   if (loading) return null;
 
@@ -76,10 +90,10 @@ export default function CartPage() {
           >
             <div>
               <h3 className="font-semibold">
-                {item.product.name}
+                {item.products.name}
               </h3>
 
-              <p>₹ {item.product.price}</p>
+              <p>₹ {item.products.price}</p>
 
               <div className="flex items-center gap-3 mt-2">
 
@@ -110,7 +124,7 @@ export default function CartPage() {
             </div>
 
             <p className="font-semibold">
-              ₹ {item.product.price * item.quantity}
+              ₹ {item.products.price * item.quantity}
             </p>
 
           </div>
@@ -124,7 +138,7 @@ export default function CartPage() {
 async function updateQty(
   id: number,
   delta: number,
-  setItems: Function
+  setItems: React.Dispatch<React.SetStateAction<CartItem[]>>
 ) {
   const res = await fetch("/api/cart/update", {
     method: "POST",
@@ -134,12 +148,20 @@ async function updateQty(
   });
 
   const data = await res.json();
-  setItems(data);
+  console.log("CART RESPONSE:", data);
+  
+
+  if (Array.isArray(data)) {
+    setItems(data);
+  } else {
+    setItems([]);
+  }
+
 }
 
 async function removeItem(
   id: number,
-  setItems: Function
+  setItems: React.Dispatch<React.SetStateAction<CartItem[]>>
 ) {
   const res = await fetch("/api/cart/remove", {
     method: "POST",

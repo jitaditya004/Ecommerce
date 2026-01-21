@@ -103,11 +103,11 @@ model reviews {
 model users {
   user_id            BigInt          @id @default(autoincrement())
   email              String          @unique @db.VarChar(255)
-  password_hash      String?
+  password_hash      String
   fullname           String?         @db.VarChar(100)
-  username           String?         @unique @db.VarChar(50)
+  username           String         @unique @db.VarChar(50)
   google_id          String?         @db.VarChar(100)
-  role               String?         @default("USER")
+  role               String         @default("USER")
   is_email_verified  Boolean?        @default(false)
   reset_token        String?
   reset_token_expiry DateTime?       @db.Timestamp(6)

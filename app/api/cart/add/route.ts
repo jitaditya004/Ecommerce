@@ -10,7 +10,6 @@ export async function POST(req: Request) {
 
   const token = (await cookies()).get("refresh")?.value;
 
-   console.log(token);
 
   if (!token) {
     return NextResponse.json(
@@ -28,7 +27,7 @@ export async function POST(req: Request) {
   try {
     await prisma.$transaction(async (tx) => {
 
-      // 1️⃣ Find or create cart
+     
       let cart = await tx.carts.findFirst({
         where: { user_id: payload.userId },
       });
@@ -41,7 +40,6 @@ export async function POST(req: Request) {
         });
       }
 
-      // 2️⃣ Check if product already in cart
       const existingItem = await tx.cart_items.findFirst({
         where: {
           cart_id: cart.cart_id,
@@ -49,13 +47,13 @@ export async function POST(req: Request) {
         },
       });
 
-      // 3️⃣ Update or Insert
+    
       if (existingItem) {
         await tx.cart_items.update({
           where: { id: existingItem.id },
           data: {
             quantity: {
-              increment: quantity, // ATOMIC OP
+              increment: quantity, 
             },
           },
         });

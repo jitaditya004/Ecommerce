@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+// import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -13,9 +13,13 @@ type NavbarProps = {
 };
 
 export default function Navbar({ onToggleSearch }: NavbarProps) {
-  const [active, setActive] = useState("Home");
-  const { user, logout } = useAuth();
+  // const [active, setActive] = useState("Home");
+  const { user, logout, loading } = useAuth();
   const pathname = usePathname();
+
+  if(loading) {
+    return null;
+  }
 
   return (
     <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur border-b">
@@ -78,7 +82,7 @@ export default function Navbar({ onToggleSearch }: NavbarProps) {
             </>
           ) : (
             <>
-              <span className="text-gray-600">{user.email}</span>
+              <span className="text-gray-600">{user.name}</span>
               <button onClick={logout} className="text-red-600">
                 Logout
               </button>
