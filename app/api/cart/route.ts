@@ -1,24 +1,11 @@
-export const runtime = "nodejs";
+// export const runtime = "nodejs";
 
 import { prisma } from "@/lib/prisma";
-// import jwt from "jsonwebtoken";
-// import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { getUserIdFromRequest } from "@/lib/serverAuth";
 
 export async function GET() {
 
-  // const cookieStore = await cookies();
-  // const token = cookieStore.get("refresh")?.value;
-
-  // if (!token) {
-  //   return NextResponse.json([], { status: 401 });
-  // }
-
-  // const payload = jwt.verify(
-  //   token,
-  //   process.env.REFRESH_TOKEN_SECRET!
-  // ) as { userId: number };
   const UserId = await getUserIdFromRequest();
   if (!UserId) {
     return NextResponse.json([], { status: 401 });
@@ -28,15 +15,27 @@ export async function GET() {
     where: { user_id: BigInt(UserId) },
     include: {
       cart_items: {
+        orderBy:{ id: "asc" },
         include: {
           products: true,
         },
       },
     },
   });
-  console.log(cart?.cart_items);
+  // console.log(cart?.cart_items);
+
+
 
   if (!cart) return NextResponse.json([]);
+
+  const stat=await prisma.cart_items.aggregate({
+    where: {cart_id: cart.cart_id},
+    _sum:{quantity: true},
+  });
+
+  const totalAmount=cart.cart_items.reduce(
+    (sum,item)=>sum+Number(item.products?.price || 0)*item.quantity,0
+  )
 
   const items = cart.cart_items.map((item) => ({
     id: Number(item.id),
@@ -48,5 +47,5 @@ export async function GET() {
     },
   }));
 
-  return NextResponse.json(items);
+  return NextResponse.json({ totalAmount,count: stat._sum.quantity, items });
 }

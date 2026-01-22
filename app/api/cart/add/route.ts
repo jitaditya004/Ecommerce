@@ -8,8 +8,21 @@ import { cookies } from "next/headers";
 export async function POST(req: Request) {
   const { productId, quantity } = await req.json();
 
-  const token = (await cookies()).get("refresh")?.value;
+  if (!productId) {
+    return NextResponse.json(
+      { message: "Product ID required" },
+      { status: 400 }
+    );
+  }
 
+  if (!quantity || quantity <= 0) {
+    return NextResponse.json(
+      { message: "Invalid quantity" },
+      { status: 400 }
+    );
+  }
+
+  const token = (await cookies()).get("access")?.value;
 
   if (!token) {
     return NextResponse.json(
@@ -20,12 +33,12 @@ export async function POST(req: Request) {
 
   const payload = jwt.verify(
     token,
-    process.env.REFRESH_TOKEN_SECRET!
+    process.env.ACCESS_TOKEN_SECRET!
   ) as { userId: number };
 
 
   try {
-    await prisma.$transaction(async (tx) => {
+    const count = await prisma.$transaction(async (tx) => {
 
      
       let cart = await tx.carts.findFirst({
@@ -49,6 +62,7 @@ export async function POST(req: Request) {
 
     
       if (existingItem) {
+
         await tx.cart_items.update({
           where: { id: existingItem.id },
           data: {
@@ -67,9 +81,19 @@ export async function POST(req: Request) {
         });
       }
 
+      const result = await tx.cart_items.aggregate({
+        where: { cart_id: cart.cart_id },
+        _sum: {
+          quantity: true,
+        },
+      });
+
+      return result._sum.quantity || 0;
+
     });
 
-    return NextResponse.json({ message: "Added to cart" });
+
+    return NextResponse.json({ count,message: "Added to cart" });
 
   } catch (error) {
     console.error(error);

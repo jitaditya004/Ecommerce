@@ -1,4 +1,5 @@
 "use client";
+import { useCart } from "@/hooks/useCart";
 
 type Props = {
   productId: number;
@@ -9,9 +10,10 @@ export default function AddToCartButton({
   productId,
   disabled,
 }: Props) {
+  const { count } = useCart();
 
   const handleAdd = async () => {
-    const res = await fetch("http://localhost:3000/api/cart/add", {
+    const res = await fetch("/api/cart/add", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -31,6 +33,7 @@ export default function AddToCartButton({
 
   return (
     <button
+      type="button"
       disabled={disabled}
       onClick={handleAdd}
       className="mt-6 bg-black text-white px-8 py-3 rounded-lg disabled:opacity-50"

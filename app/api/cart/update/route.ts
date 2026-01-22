@@ -56,10 +56,13 @@ if (!UserId) {
         },
       },
     },
+    orderBy: {
+      id: "asc",
+    },
   });
 
-  return NextResponse.json(
-  updatedCart.map(i => ({
+
+  const items =  updatedCart.map(i => ({
     id: Number(i.id),
     quantity: i.quantity,
     products: {
@@ -67,7 +70,10 @@ if (!UserId) {
       price: Number(i.products?.price),
       image_url: i.products?.image_url
     }
-  }))
-);
+  }));
+
+  return NextResponse.json(
+    { items }
+  );
 }
 

@@ -4,6 +4,8 @@
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useCart } from "@/hooks/useCart";
+
 
 
 const NAV_ITEMS = ["Home", "Collection", "About", "Contact"];
@@ -16,6 +18,7 @@ export default function Navbar({ onToggleSearch }: NavbarProps) {
   // const [active, setActive] = useState("Home");
   const { user, logout, loading } = useAuth();
   const pathname = usePathname();
+  const { count } = useCart();
 
   if(loading) {
     return null;
@@ -49,7 +52,7 @@ export default function Navbar({ onToggleSearch }: NavbarProps) {
                 {item}
 
                 <span
-                  className={`absolute left-0 -bottom-1 h-[2px] bg-black transition-all
+                  className={`absolute left-0 -bottom-1 h-0.5 bg-black transition-all
                     ${isActive ? "w-full" : "w-0"}
                   `}
                 />
@@ -64,8 +67,14 @@ export default function Navbar({ onToggleSearch }: NavbarProps) {
             🔍
           </button>
 
-          <Link href="/cart" className="hover:scale-110 transition">
+          <Link href="/cart" className="relative hover:scale-110 transition">
             🛒
+
+            {count > 0 && (
+              <span className="absolute -bottom-2 -right-2 bg-red-500 text-white text-[10px] px-1.5 rounded-full">
+                {count}
+              </span>
+            )}
           </Link>
 
           {!user ? (

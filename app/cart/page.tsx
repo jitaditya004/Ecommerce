@@ -1,54 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useCart} from "@/hooks/useCart";
+import { mutate } from "swr";
 
-type CartItem = {
-  id: number;
-  quantity: number;
-  products: {
-    name: string;
-    price: number;
-    image_url: string | null;
-  };
-};
 
 export default function CartPage() {
   const { user, loading } = useAuth();
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [fetching, setFetching] = useState(true);
+  const { items, totalPrice, isLoading } = useCart();
 
-const userId = user?.id;
+  
 
-useEffect(() => {
-  if (!userId) return;
-
-  let active = true;
-
-  fetch("/api/cart", {
-    credentials: "include",
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      if (!active) return;
-
-      setItems(data);
-      setFetching(false);
-    })
-    .catch(() => {
-      if (!active) return;
-      setFetching(false);
-    });
-
-  return () => {
-    active = false;
-  };
-
-}, [userId]);
+  if (loading) {
+    return <p className="p-20">Checking session...</p>;
+  }
 
 
+  if (isLoading) {
+    return <p className="p-20">Loading cart...</p>;
+  }
 
-  if (loading) return null;
 
   if (!user) {
     return (
@@ -58,10 +29,6 @@ useEffect(() => {
         </h2>
       </div>
     );
-  }
-
-  if (fetching) {
-    return <p className="p-20">Loading cart...</p>;
   }
 
   if (items.length === 0) {
@@ -80,6 +47,10 @@ useEffect(() => {
       <h1 className="text-3xl font-bold mb-8">
         Your Cart
       </h1>
+      <h2 className="text-xl font-semibold mb-4">
+        Total: ₹ {totalPrice}
+      </h2>
+
 
       <div className="space-y-6">
 
@@ -98,7 +69,8 @@ useEffect(() => {
               <div className="flex items-center gap-3 mt-2">
 
                 <button
-                  onClick={() => updateQty(item.id, -1, setItems)}
+                  type="button"
+                  onClick={() => updateQty(item.id, -1)}
                   className="px-2 border"
                 >
                   -
@@ -107,14 +79,16 @@ useEffect(() => {
                 <span>{item.quantity}</span>
 
                 <button
-                  onClick={() => updateQty(item.id, 1, setItems)}
+                  type="button"
+                  onClick={() => updateQty(item.id, 1)}
                   className="px-2 border"
                 >
                   +
                 </button>
 
                 <button
-                  onClick={() => removeItem(item.id, setItems)}
+                  type="button"
+                  onClick={() => removeItem(item.id)}
                   className="ml-4 text-red-600"
                 >
                   Remove
@@ -131,45 +105,53 @@ useEffect(() => {
         ))}
 
       </div>
+
+      {/* <button
+        type="button"
+        onClick={handleCheckout}
+        className="mt-6 bg-black text-white px-6 py-2 rounded"
+      >
+        Proceed To Checkout
+      </button> */}
+
     </div>
   );
 }
 
-async function updateQty(
-  id: number,
-  delta: number,
-  setItems: React.Dispatch<React.SetStateAction<CartItem[]>>
-) {
-  const res = await fetch("/api/cart/update", {
+
+async function updateQty(id: number, delta: number) {
+  await fetch("/api/cart/update", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
     body: JSON.stringify({ id, delta }),
   });
 
-  const data = await res.json();
-  console.log("CART RESPONSE:", data);
-  
-
-  if (Array.isArray(data)) {
-    setItems(data);
-  } else {
-    setItems([]);
-  }
-
+  mutate("/api/cart"); // re-fetch cart
 }
 
-async function removeItem(
-  id: number,
-  setItems: React.Dispatch<React.SetStateAction<CartItem[]>>
-) {
-  const res = await fetch("/api/cart/remove", {
+
+async function removeItem(id: number) {
+  await fetch("/api/cart/remove", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
     body: JSON.stringify({ id }),
   });
 
-  const data = await res.json();
-  setItems(data);
+  mutate("/api/cart");
 }
+
+
+// const handleCheckout = async () => {
+//   const res = await fetch("/api/order/create", {
+//     method: "POST",
+//     credentials: "include",
+//   });
+
+//   const data = await res.json();
+
+//   if (data.orderId) {
+//     window.location.href = `/payment?orderId=${data.orderId}`;
+//   }
+// };

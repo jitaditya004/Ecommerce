@@ -46,6 +46,7 @@ const handleSubmit = async (e: React.FormEvent) => {
         className="border p-2 w-full"
         placeholder="Email"
         onChange={(e) => setEmail(e.target.value)}
+        required
       />
 
       <input
@@ -53,9 +54,10 @@ const handleSubmit = async (e: React.FormEvent) => {
         type="password"
         placeholder="Password"
         onChange={(e) => setPassword(e.target.value)}
+        required
       />
 
-      <button disabled={submitting} className="w-full bg-black text-white py-2">
+      <button type="submit" disabled={submitting} className="w-full bg-black text-white py-2">
         Login
       </button>
     </form>

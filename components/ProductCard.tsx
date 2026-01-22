@@ -1,6 +1,8 @@
 import { Product } from "@/types/product";
 import Image from "next/image";
 import Link from "next/link";
+import AddToCartButton from "./AddToCartButton";
+
 
 export default function ProductCard({ product }: { product: Product }) {
   const imageSrc = product.image_url || "/placeholder.png";
@@ -31,12 +33,7 @@ export default function ProductCard({ product }: { product: Product }) {
         View
       </Link>
 
-      <button
-        className="mt-4 w-full bg-black text-white py-2 rounded-lg disabled:opacity-50"
-        disabled={product.stock === 0}
-      >
-        {product.stock > 0 ? "Add to Cart" : "Out of Stock"}
-      </button>
+      <AddToCartButton productId={product.product_id} disabled={product.stock === 0} />
 
     </div>
   );
