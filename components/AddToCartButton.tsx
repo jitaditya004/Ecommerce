@@ -10,7 +10,7 @@ export default function AddToCartButton({
   productId,
   disabled,
 }: Props) {
-  const { count } = useCart();
+  const { mutate } = useCart();
 
   const handleAdd = async () => {
     const res = await fetch("/api/cart/add", {
@@ -27,6 +27,8 @@ export default function AddToCartButton({
       alert("Please login first");
       return;
     }
+
+    await mutate();
 
     alert("Added to cart");
   };

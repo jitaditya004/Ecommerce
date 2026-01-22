@@ -106,13 +106,13 @@ export default function CartPage() {
 
       </div>
 
-      {/* <button
+      <button
         type="button"
         onClick={handleCheckout}
         className="mt-6 bg-black text-white px-6 py-2 rounded"
       >
         Proceed To Checkout
-      </button> */}
+      </button>
 
     </div>
   );
@@ -143,15 +143,15 @@ async function removeItem(id: number) {
 }
 
 
-// const handleCheckout = async () => {
-//   const res = await fetch("/api/order/create", {
-//     method: "POST",
-//     credentials: "include",
-//   });
+const handleCheckout = async () => {
+  const res = await fetch("/api/order/create", {
+    method: "POST",
+    credentials: "include",
+  });
 
-//   const data = await res.json();
+  const data = await res.json();
 
-//   if (data.orderId) {
-//     window.location.href = `/payment?orderId=${data.orderId}`;
-//   }
-// };
+  if (data.orderId) {
+    window.location.href = `/checkout?orderId=${data.orderId}`;
+  }
+};
