@@ -14,6 +14,7 @@ export default function LoginPage() {
 
 const [submitting, setSubmitting] = useState(false);
 
+
 const handleSubmit = async (e: React.FormEvent) => {
   setError("");
 
@@ -22,8 +23,13 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   setSubmitting(true);
   try {
-    await login(email, password);
-    router.push("/");
+    const user = await login(email, password);
+    if ( user.role === "ADMIN") {
+      router.push("/admin");
+    } else {
+      router.push("/");
+    }
+
   } catch {
     setError("Invalid credentials");
   } finally {

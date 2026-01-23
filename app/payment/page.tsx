@@ -24,7 +24,7 @@ export default function PaymentPage() {
       const data = await res.json();
 
       if (data.success) {
-        router.push("/success");
+        router.push(`/success?orderId=${orderId}`);
       } else {
         alert("Payment failed. Try again.");
       }
@@ -34,38 +34,55 @@ export default function PaymentPage() {
   };
 
   if (!orderId) {
-    return <p className="p-20">Invalid order</p>;
+    return (
+      <div className="min-h-screen flex items-center justify-center text-zinc-400">
+        Invalid order
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-md mx-auto p-10">
-      <h1 className="text-2xl font-bold mb-6">Payment</h1>
+    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black flex items-center justify-center px-4">
 
-      <p className="mb-4">Order ID: {orderId}</p>
+      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 sm:p-10 w-full max-w-md shadow-xl animate-scale-in text-white">
 
-      <button
-        onClick={() => payNow("CARD")}
-        disabled={paying}
-        className="w-full bg-blue-600 text-white py-2 mb-3"
-      >
-        Pay With Card
-      </button>
+        <h1 className="text-3xl font-bold mb-2 text-center">
+          Complete Payment
+        </h1>
 
-      <button
-        onClick={() => payNow("UPI")}
-        disabled={paying}
-        className="w-full bg-green-600 text-white py-2 mb-3"
-      >
-        Pay With UPI
-      </button>
+        <p className="text-sm text-zinc-400 text-center mb-6">
+          Order ID: {orderId}
+        </p>
 
-      <button
-        onClick={() => payNow("COD")}
-        disabled={paying}
-        className="w-full bg-gray-700 text-white py-2"
-      >
-        Cash On Delivery
-      </button>
+        <div className="space-y-4">
+
+          <button
+            onClick={() => payNow("CARD")}
+            disabled={paying}
+            className="w-full bg-white text-black py-3 rounded-xl font-medium hover:scale-105 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {paying ? "Processing..." : "💳 Pay With Card"}
+          </button>
+
+          <button
+            onClick={() => payNow("UPI")}
+            disabled={paying}
+            className="w-full bg-green-500 text-black py-3 rounded-xl font-medium hover:scale-105 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {paying ? "Processing..." : "📱 Pay With UPI"}
+          </button>
+
+          <button
+            onClick={() => payNow("COD")}
+            disabled={paying}
+            className="w-full border border-zinc-700 py-3 rounded-xl font-medium hover:bg-zinc-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {paying ? "Processing..." : "🚚 Cash On Delivery"}
+          </button>
+
+        </div>
+
+      </div>
     </div>
   );
 }

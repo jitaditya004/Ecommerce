@@ -2,6 +2,7 @@ import { Product } from "@/types/product";
 import Image from "next/image";
 import Link from "next/link";
 import AddToCartButton from "./AddToCartButton";
+import WishlistButton from "./WishlistButton";
 
 
 export default function ProductCard({ product }: { product: Product }) {
@@ -29,12 +30,28 @@ export default function ProductCard({ product }: { product: Product }) {
         ₹{product.price}
       </p>
 
+      <p className="text-gray-600 text-sm mt-1">
+        Rating: {product.avgRating}
+      </p>
+
       <Link className="mt-4 w-full bg-black text-white py-2 rounded-lg disabled:opacity-50" href={`/products/${product.slug}`}>
         View
       </Link>
 
       <AddToCartButton productId={product.product_id} disabled={product.stock === 0} />
 
+      <WishlistButton productId={product.product_id} />
+
     </div>
   );
 }
+
+
+// const toggleWishlist = async () => {
+//   await fetch("/api/wishlist/toggle", {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json" },
+//     credentials: "include",
+//     body: JSON.stringify({ productId }),
+//   });
+// };

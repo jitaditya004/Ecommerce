@@ -3,12 +3,20 @@
 import useSWR from "swr";
 import Link from "next/link";
 
+type Order = {
+  id: string;
+  total: number;
+  status: string;
+  payment_status: string;
+};
+
+
 const fetcher = (url: string) =>
   fetch(url, { credentials: "include" }).then(r => r.json());
 
 export default function OrdersPage() {
 
-  const { data, isLoading } = useSWR("/api/order", fetcher);
+  const { data, isLoading } = useSWR<Order[]>("/api/order", fetcher);
 
   if (isLoading) return <p className="p-20">Loading orders...</p>;
 
@@ -21,7 +29,7 @@ export default function OrdersPage() {
 
       <h1 className="text-2xl font-bold mb-6">My Orders</h1>
 
-      {data.map((order: any) => (
+      {data.map((order) => (
         <Link
           key={order.id}
           href={`/orders/${order.id}`}

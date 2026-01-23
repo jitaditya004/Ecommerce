@@ -29,9 +29,23 @@ export async function GET(
     );
   }
 
-  return NextResponse.json({
+  const stats = await prisma.reviews.aggregate({
+    where: {
+      product_id: BigInt(product.product_id),
+    },
+    _avg: {
+      rating: true,
+    },
+  });
+
+  const formatProduct={
     ...product,
     product_id: Number(product.product_id),
     price: Number(product.price),
+  }
+
+  return NextResponse.json({
+    formatProduct,
+    avgRating: stats._avg.rating || 0
   });
 }

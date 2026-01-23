@@ -87,6 +87,7 @@ useEffect(() => {
     const data = await res.json();
     setAccessToken(data.accessToken);
     setUser(data.user);
+    return data.user;
   };
 
   const logout = async () => {

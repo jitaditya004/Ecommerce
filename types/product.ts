@@ -6,4 +6,5 @@ export type Product = {
   price: number;
   stock: number;
   image_url: string | null;
+  avgRating: number;
 };
