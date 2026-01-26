@@ -17,7 +17,16 @@ export async function GET(req: Request) {
   if (sort === "price_asc") orderBy = { price: "asc" };
   if (sort === "price_desc") orderBy = { price: "desc" };
   if (sort === "name_asc") orderBy = { name: "asc" };
-  if (sort === "reviews") orderBy = { reviews_count: "desc" };
+  if (sort === "reviews") {
+    orderBy = {
+      reviews: {
+        _avg: {
+          rating: "desc",
+        },
+      },
+    };
+  }
+
 
   const products = await prisma.products.findMany({
     where: {

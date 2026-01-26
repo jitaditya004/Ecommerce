@@ -12,6 +12,8 @@ export async function getAdminFromRequest() {
       process.env.ACCESS_TOKEN_SECRET!
     ) as { userId: string; role: string };
 
+    
+
     if (payload.role !== "ADMIN") return null;
 
     return payload.userId;

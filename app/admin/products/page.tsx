@@ -1,84 +1,71 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import useSWR from "swr";
+import Link from "next/link";
 
-type Product = {
-  product_id: string;
-  name: string;
-  price: number;
-  stock: number;
-};
+const fetcher = (url: string) => fetch(url).then(r => r.json());
 
-export default function AdminProducts() {
+export default function AdminProductsPage() {
+  const { data, isLoading, mutate } = useSWR("/api/admin/products", fetcher);
 
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  async function fetchProducts() {
-    const res = await fetch("/api/admin/products", {
-      credentials: "include",
-    });
-
-    const data = await res.json();
-    setProducts(data);
-    setLoading(false);
-  }
-
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  async function deleteProduct(id: string) {
+  const handleDelete = async (id: string) => {
     await fetch(`/api/admin/products/${id}`, {
       method: "DELETE",
-      credentials: "include",
     });
 
-    fetchProducts();
-  }
+    mutate();
+  };
 
-  if (loading) return <p>Loading...</p>;
+  if (isLoading) {
+    return <p className="text-zinc-400">Loading...</p>;
+  }
 
   return (
     <div>
 
-      <h1 className="text-2xl font-bold mb-4">
-        Products
-      </h1>
+      <div className="flex justify-between mb-6">
+        <h1 className="text-2xl font-bold">Products</h1>
 
-      <table className="border w-full">
+        <Link
+          href="/admin/products/new"
+          className="bg-white text-black px-4 py-2 rounded-lg"
+        >
+          Add Product
+        </Link>
+      </div>
 
-        <thead>
-          <tr className="border">
-            <th>Name</th>
-            <th>Price</th>
-            <th>Stock</th>
-            <th>Action</th>
-          </tr>
-        </thead>
+      <div className="space-y-4">
 
-        <tbody>
-          {products.map(p => (
-            <tr key={p.product_id} className="border">
+        {data.products.map((p: any) => (
+          <div
+            key={p.product_id}
+            className="bg-zinc-900 border border-zinc-800 p-4 rounded-xl flex justify-between items-center"
+          >
+            <div>
+              <p className="font-medium">{p.name}</p>
+              <p className="text-sm text-zinc-400">₹ {p.price}</p>
+            </div>
 
-              <td>{p.name}</td>
-              <td>₹ {p.price}</td>
-              <td>{p.stock}</td>
+            <div className="flex gap-3">
+              <Link
+                href={`/admin/products/${p.product_id}`}
+                className="text-blue-400"
+              >
+                Edit
+              </Link>
 
-              <td>
-                <button
-                  onClick={() => deleteProduct(p.product_id)}
-                  className="text-red-600"
-                >
-                  Delete
-                </button>
-              </td>
+              <button
+                onClick={() => handleDelete(p.product_id)}
+                className="text-red-400"
+              >
+                Delete
+              </button>
+            </div>
 
-            </tr>
-          ))}
-        </tbody>
+          </div>
+        ))}
 
-      </table>
+      </div>
 
     </div>
   );

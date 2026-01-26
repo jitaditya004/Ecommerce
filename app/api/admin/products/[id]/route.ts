@@ -2,14 +2,28 @@ import cloudinary from "@/lib/cloudinary";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-export async function POST(req: Request) {
+export async function GET(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  const product = await prisma.products.findUnique({
+    where: {
+      product_id: BigInt(params.id),
+    },
+  });
+
+  return NextResponse.json(product);
+}
+
+
+export async function PUT(req: Request, { params }: any) {
   const formData = await req.formData();
 
   const name = formData.get("name") as string;
   const price = formData.get("price") as string;
   const image = formData.get("image") as File;
 
-  let imageUrl = null;
+  let imageUrl;
 
   if (image) {
     const bytes = await image.arrayBuffer();
@@ -28,14 +42,31 @@ export async function POST(req: Request) {
     imageUrl = upload.secure_url;
   }
 
-  const product = await prisma.products.create({
+  const updated = await prisma.products.update({
+    where: {
+      product_id: BigInt(params.id),
+    },
     data: {
       name,
       price: Number(price),
-      slug: name.toLowerCase().replace(/\s+/g, "-"),
-      image_url: imageUrl,
+      ...(imageUrl && { image_url: imageUrl }),
     },
   });
 
-  return NextResponse.json(product);
+  return NextResponse.json(updated);
+}
+
+
+
+export async function DELETE(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  await prisma.products.delete({
+    where: {
+      product_id: BigInt(params.id),
+    },
+  });
+
+  return NextResponse.json({ success: true });
 }
