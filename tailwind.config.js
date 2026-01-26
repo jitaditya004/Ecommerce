@@ -16,6 +16,16 @@ module.exports = {
         "100%": { transform: "scale(1)", opacity: "1" },
       },
     },
+    animation: {
+      "success-bar": "successBar 1.5s ease-out forwards",
+    },
+    keyframes: {
+      successBar: {
+        "0%": { height: "100%" },
+        "100%": { height: "0%" },
+      },
+    },
+
 
     },
   },

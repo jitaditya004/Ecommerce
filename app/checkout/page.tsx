@@ -28,37 +28,79 @@ export default function CheckoutPage() {
     }
   };
 
-  if (isLoading) return <p className="p-20">Loading...</p>;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-zinc-400 animate-pulse">
+        Loading checkout...
+      </div>
+    );
+  }
 
   if (items.length === 0) {
-    return <p className="p-20">Cart empty</p>;
+    return (
+      <div className="min-h-screen flex items-center justify-center text-zinc-400">
+        Your cart is empty
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-10">
-      <h1 className="text-2xl font-bold mb-6">Checkout</h1>
+    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black px-4 sm:px-10 py-12 text-white">
 
-      {items.map(item => (
-        <div key={item.id} className="flex justify-between mb-3">
-          <p>{item.products.name} × {item.quantity}</p>
-          <p>₹ {item.products.price * item.quantity}</p>
+      <div className="max-w-3xl mx-auto bg-zinc-900 border border-zinc-800 rounded-2xl p-6 sm:p-8 shadow-xl animate-scale-in">
+
+        <h1 className="text-3xl font-bold mb-6">
+          Checkout
+        </h1>
+
+        <div className="space-y-4">
+
+          {items.map((item) => (
+            <div
+              key={item.id}
+              className="flex justify-between items-center bg-zinc-800/60 p-4 rounded-xl"
+            >
+              <div>
+                <p className="font-medium">
+                  {item.products.name}
+                </p>
+
+                <p className="text-sm text-zinc-400">
+                  Qty: {item.quantity}
+                </p>
+              </div>
+
+              <p className="font-semibold text-green-400">
+                ₹ {item.products.price * item.quantity}
+              </p>
+
+            </div>
+          ))}
+
         </div>
-      ))}
 
-      <hr className="my-4" />
+        <div className="border-t border-zinc-800 mt-6 pt-5 flex justify-between items-center">
 
-      <div className="flex justify-between font-bold">
-        <p>Total</p>
-        <p>₹ {totalPrice}</p>
+          <p className="text-lg font-medium">
+            Total
+          </p>
+
+          <p className="text-2xl font-bold text-green-400">
+            ₹ {totalPrice}
+          </p>
+
+        </div>
+
+        <button
+          onClick={createOrder}
+          disabled={loading}
+          className="w-full mt-6 bg-white text-black py-3 rounded-full font-medium hover:scale-105 transition disabled:opacity-60"
+        >
+          {loading ? "Creating Order..." : "Proceed To Payment"}
+        </button>
+
       </div>
 
-      <button
-        onClick={createOrder}
-        disabled={loading}
-        className="mt-6 bg-black text-white px-6 py-2 rounded"
-      >
-        {loading ? "Creating Order..." : "Proceed To Payment"}
-      </button>
     </div>
   );
 }

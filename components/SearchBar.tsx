@@ -7,18 +7,21 @@ export default function SearchBar({ visible }: SearchBarProps) {
     <div
       className={`
         overflow-hidden transition-all duration-300
-        ${visible ? "max-h-24 opacity-100" : "max-h-0 opacity-0"}
+        ${visible ? "max-h-28 opacity-100" : "max-h-0 opacity-0"}
       `}
     >
-      <div className="bg-white border-t px-10 py-4">
+      <div className="bg-zinc-950/90 backdrop-blur border-t border-zinc-800 px-4 sm:px-10 py-4">
+
         <input
           type="text"
           placeholder="Search products..."
           className="
-            w-full rounded-full border px-6 py-3
-            focus:outline-none focus:ring-2 focus:ring-black/10
+            w-full rounded-full bg-zinc-900 border border-zinc-700 px-6 py-3
+            text-white placeholder-zinc-400
+            focus:outline-none focus:border-white transition
           "
         />
+
       </div>
     </div>
   );

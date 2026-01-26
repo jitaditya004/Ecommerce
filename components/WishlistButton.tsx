@@ -7,19 +7,17 @@ export default function WishlistButton({
 }: {
   productId: number;
 }) {
-
   const { wishlist, mutate } = useWishlist();
 
   const isWishlisted = wishlist.some(
-    item => item.id === productId
+    (item) => item.id === productId
   );
 
   const toggleWishlist = async () => {
-
     mutate(
-      prev =>
+      (prev) =>
         isWishlisted
-          ? prev?.filter(p => p.id !== productId)
+          ? prev?.filter((p) => p.id !== productId)
           : [...(prev || []), { id: productId } as any],
       false
     );
@@ -37,8 +35,13 @@ export default function WishlistButton({
   return (
     <button
       onClick={toggleWishlist}
-      className="text-xl"
       aria-label="Toggle Wishlist"
+      className={`
+        w-9 h-9 flex items-center justify-center rounded-full
+        bg-black/60 backdrop-blur border border-white/10
+        transition transform active:scale-90
+        ${isWishlisted ? "text-red-500 scale-110 animate-pulse" : "text-white hover:scale-110"}
+      `}
     >
       {isWishlisted ? "❤️" : "🤍"}
     </button>

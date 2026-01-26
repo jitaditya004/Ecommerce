@@ -2,34 +2,34 @@
 
 export default function HomeClient() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black text-white overflow-hidden">
+    <main className="relative min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black text-white overflow-hidden">
 
       <div className="absolute -top-32 -left-32 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl animate-pulse" />
       <div className="absolute top-40 -right-32 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl animate-pulse" />
 
-      <section className="relative px-10 pt-28 pb-20 text-center">
+      <section className="relative px-4 sm:px-10 pt-28 pb-20 text-center">
 
-        <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent animate-fade-up">
           Discover Products You’ll Love
         </h1>
 
-        <p className="mt-6 max-w-2xl mx-auto text-lg text-zinc-400">
+        <p className="mt-6 max-w-2xl mx-auto text-base sm:text-lg text-zinc-400 animate-fade-up delay-100">
           Premium quality. Curated collections. Seamless shopping experience.
         </p>
 
-        <div className="mt-10 flex justify-center gap-4 flex-wrap">
+        <div className="mt-10 flex justify-center gap-4 flex-wrap animate-fade-up delay-200">
 
-          <button className="px-8 py-3 rounded-full bg-white text-black font-semibold transition-all duration-300 hover:scale-105 hover:shadow-xl">
+          <button className="px-8 py-3 rounded-full bg-white text-black font-semibold transition-all duration-300 hover:scale-105 hover:shadow-xl active:scale-95">
             Shop Now
           </button>
 
-          <button className="px-8 py-3 rounded-full border border-zinc-700 text-white transition-all duration-300 hover:bg-zinc-800 hover:border-zinc-500">
+          <button className="px-8 py-3 rounded-full border border-zinc-700 text-white transition-all duration-300 hover:bg-zinc-800 hover:border-zinc-500 active:scale-95">
             Browse Collection
           </button>
 
         </div>
 
-        <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-4xl mx-auto">
+        <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-4xl mx-auto">
 
           <div className="p-6 rounded-2xl bg-zinc-900/70 backdrop-blur border border-zinc-800 hover:scale-105 transition">
             <h3 className="text-lg font-semibold">Fast Delivery</h3>
@@ -54,7 +54,7 @@ export default function HomeClient() {
 
         </div>
 
-        <div className="mt-20 flex justify-center gap-12 flex-wrap">
+        <div className="mt-20 flex justify-center gap-10 sm:gap-12 flex-wrap">
 
           <div className="text-center">
             <p className="text-3xl font-bold">10k+</p>

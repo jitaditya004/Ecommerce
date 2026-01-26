@@ -1,30 +1,45 @@
 export default function ContactPage() {
   return (
-    <div className="px-10 py-20 max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">
-        Contact Us
-      </h1>
+    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black px-4 sm:px-10 py-16 text-white">
 
-      <p className="text-gray-600 mb-8">
-        Have questions? Reach out to us.
-      </p>
+      <div className="max-w-3xl mx-auto text-center mb-12">
+        <h1 className="text-4xl font-bold mb-4">
+          Contact Us
+        </h1>
 
-      <div className="space-y-4">
-        <div>
-          <span className="font-medium">Email:</span>{" "}
-          support@ecommerce.com
-        </div>
-
-        <div>
-          <span className="font-medium">Phone:</span>{" "}
-          +91 9876543210
-        </div>
-
-        <div>
-          <span className="font-medium">Location:</span>{" "}
-          India
-        </div>
+        <p className="text-zinc-400">
+          Have questions? Reach out to us anytime.
+        </p>
       </div>
+
+      <div className="max-w-3xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-6">
+
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 text-center hover:scale-105 transition">
+          <div className="text-2xl mb-3">📧</div>
+          <p className="font-medium">Email</p>
+          <p className="text-zinc-400 text-sm mt-1">
+            support@ecommerce.com
+          </p>
+        </div>
+
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 text-center hover:scale-105 transition">
+          <div className="text-2xl mb-3">📞</div>
+          <p className="font-medium">Phone</p>
+          <p className="text-zinc-400 text-sm mt-1">
+            +91 9876543210
+          </p>
+        </div>
+
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 text-center hover:scale-105 transition">
+          <div className="text-2xl mb-3">📍</div>
+          <p className="font-medium">Location</p>
+          <p className="text-zinc-400 text-sm mt-1">
+            India
+          </p>
+        </div>
+
+      </div>
+
     </div>
   );
 }

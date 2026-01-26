@@ -1,123 +1,131 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { useCart} from "@/hooks/useCart";
+import { useCart } from "@/hooks/useCart";
 import { mutate } from "swr";
-
+import { useRouter } from "next/navigation";
 
 export default function CartPage() {
   const { user, loading } = useAuth();
   const { items, totalPrice, isLoading } = useCart();
-
-  
+  const router = useRouter();
 
   if (loading) {
-    return <p className="p-20">Checking session...</p>;
+    return (
+      <div className="min-h-screen flex items-center justify-center text-zinc-400 animate-pulse">
+        Checking session...
+      </div>
+    );
   }
-
 
   if (isLoading) {
-    return <p className="p-20">Loading cart...</p>;
+    return (
+      <div className="min-h-screen flex items-center justify-center text-zinc-400 animate-pulse">
+        Loading cart...
+      </div>
+    );
   }
-
 
   if (!user) {
     return (
-      <div className="p-20 text-center">
-        <h2 className="text-xl font-semibold">
-          Please login to view your cart
-        </h2>
+      <div className="min-h-screen flex items-center justify-center text-zinc-400">
+        Please login to view your cart
       </div>
     );
   }
 
   if (items.length === 0) {
     return (
-      <div className="p-20 text-center">
-        <h2 className="text-xl font-semibold">
-          Your cart is empty
-        </h2>
+      <div className="min-h-screen flex items-center justify-center text-zinc-400">
+        Your cart is empty
       </div>
     );
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-10">
+    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black px-4 sm:px-10 py-12 text-white">
 
-      <h1 className="text-3xl font-bold mb-8">
-        Your Cart
-      </h1>
-      <h2 className="text-xl font-semibold mb-4">
-        Total: ₹ {totalPrice}
-      </h2>
+      <div className="max-w-5xl mx-auto">
 
+        <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
+          <h1 className="text-3xl font-bold">Your Cart</h1>
 
-      <div className="space-y-6">
+          <p className="text-xl font-semibold text-green-400">
+            Total: ₹ {totalPrice}
+          </p>
+        </div>
 
-        {items.map((item) => (
-          <div
-            key={item.id}
-            className="flex justify-between items-center border p-4 rounded-lg"
-          >
-            <div>
-              <h3 className="font-semibold">
-                {item.products.name}
-              </h3>
+        <div className="space-y-5">
 
-              <p>₹ {item.products.price}</p>
+          {items.map((item) => (
+            <div
+              key={item.id}
+              className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-zinc-900 border border-zinc-800 rounded-2xl p-5 hover:scale-[1.01] transition"
+            >
+              <div>
+                <h3 className="font-semibold text-lg">
+                  {item.products.name}
+                </h3>
 
-              <div className="flex items-center gap-3 mt-2">
+                <p className="text-zinc-400">
+                  ₹ {item.products.price}
+                </p>
 
-                <button
-                  type="button"
-                  onClick={() => updateQty(item.id, -1)}
-                  className="px-2 border"
-                >
-                  -
-                </button>
+                <div className="flex items-center gap-3 mt-3">
 
-                <span>{item.quantity}</span>
+                  <button
+                    onClick={() => updateQty(item.id, -1)}
+                    className="w-8 h-8 rounded-full border border-zinc-700 hover:bg-zinc-800 transition"
+                  >
+                    -
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={() => updateQty(item.id, 1)}
-                  className="px-2 border"
-                >
-                  +
-                </button>
+                  <span className="min-w-[24px] text-center">
+                    {item.quantity}
+                  </span>
 
-                <button
-                  type="button"
-                  onClick={() => removeItem(item.id)}
-                  className="ml-4 text-red-600"
-                >
-                  Remove
-                </button>
+                  <button
+                    onClick={() => updateQty(item.id, 1)}
+                    className="w-8 h-8 rounded-full border border-zinc-700 hover:bg-zinc-800 transition"
+                  >
+                    +
+                  </button>
 
+                  <button
+                    onClick={() => removeItem(item.id)}
+                    className="ml-4 text-red-500 hover:text-red-400 transition"
+                  >
+                    Remove
+                  </button>
+
+                </div>
               </div>
+
+              <p className="font-semibold text-green-400">
+                ₹ {item.products.price * item.quantity}
+              </p>
+
             </div>
+          ))}
 
-            <p className="font-semibold">
-              ₹ {item.products.price * item.quantity}
-            </p>
+        </div>
 
-          </div>
-        ))}
+        <div className="mt-8 flex justify-end">
+
+          <button
+            onClick={handleCheckout}
+            className="bg-white text-black px-8 py-3 rounded-full font-medium hover:scale-105 transition"
+          >
+            Proceed To Checkout
+          </button>
+
+        </div>
 
       </div>
-
-      <button
-        type="button"
-        onClick={handleCheckout}
-        className="mt-6 bg-black text-white px-6 py-2 rounded"
-      >
-        Proceed To Checkout
-      </button>
 
     </div>
   );
 }
-
 
 async function updateQty(id: number, delta: number) {
   await fetch("/api/cart/update", {
@@ -127,9 +135,8 @@ async function updateQty(id: number, delta: number) {
     body: JSON.stringify({ id, delta }),
   });
 
-  mutate("/api/cart"); // re-fetch cart
+  mutate("/api/cart");
 }
-
 
 async function removeItem(id: number) {
   await fetch("/api/cart/remove", {
@@ -142,8 +149,7 @@ async function removeItem(id: number) {
   mutate("/api/cart");
 }
 
-
-const handleCheckout = async () => {
+async function handleCheckout() {
   const res = await fetch("/api/order/create", {
     method: "POST",
     credentials: "include",
@@ -154,4 +160,4 @@ const handleCheckout = async () => {
   if (data.orderId) {
     window.location.href = `/checkout?orderId=${data.orderId}`;
   }
-};
+}

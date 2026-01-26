@@ -1,4 +1,3 @@
-import { Product } from "@/types/product";
 import ProductGrid from "@/components/ProductGrid";
 import Controls from "@/components/Controls";
 import { Suspense } from "react";
@@ -14,26 +13,76 @@ async function getProducts(searchParams: Promise<any>) {
   );
 
   if (!res.ok) {
-    throw new Error("Failed to fetch products");
+    return {
+      products: [],
+      total: 0,
+      error: true,
+    };
   }
 
-  return res.json();
+  const data = await res.json();
+
+  return {
+    ...data,
+    error: false,
+  };
 }
 
+
 export default async function CollectionPage({ searchParams }: any) {
-  const { products, total } = await getProducts(searchParams);
+  const { products, total,error } = await getProducts(searchParams);
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black text-white">
+        <div className="text-center space-y-4">
+          <h1 className="text-3xl font-bold">Something went wrong</h1>
+          <p className="text-zinc-400">
+            Failed to load products. Please try again.
+          </p>
+          <a
+            href="/collection"
+            className="inline-block bg-white text-black px-6 py-2 rounded-full font-medium hover:scale-105 transition"
+          >
+            Retry
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="px-10 py-16">
-      <h1 className="text-3xl font-bold mb-8">
-        Our Collection
-      </h1>
+    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black px-4 sm:px-10 py-12 text-white">
 
-      <Controls total={total} />
+      <div className="max-w-7xl mx-auto">
 
-      <Suspense fallback={<p>Loading...</p>}>
-        <ProductGrid products={products} />
-      </Suspense>
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+          <h1 className="text-3xl sm:text-4xl font-bold">
+            Our Collection
+          </h1>
+
+          <Controls total={total} />
+
+        </div>
+
+        <Suspense
+          fallback={
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 animate-pulse">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 h-64"
+                />
+              ))}
+            </div>
+          }
+        >
+          <ProductGrid products={products} />
+        </Suspense>
+
+      </div>
+
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import AdminSidebar from "./AdminSidebar";
 
 export default function AdminLayout({
   children,
@@ -6,20 +6,14 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen">
-      <aside className="w-64 border-r p-4">
-        <h2 className="font-bold mb-4">Admin Panel</h2>
+    <div className="flex min-h-screen bg-zinc-950 text-white">
 
-        <nav className="space-y-2">
-          <Link href="/admin" className="block">Dashboard</Link>
-          <Link href="/admin/products" className="block">Products</Link>
-          <Link href="/admin/orders" className="block">Orders</Link>
-        </nav>
-      </aside>
+      <AdminSidebar />
 
-      <main className="flex-1 p-6">
+      <main className="flex-1 p-4 sm:p-6 bg-gradient-to-br from-zinc-950 via-zinc-900 to-black">
         {children}
       </main>
+
     </div>
   );
 }

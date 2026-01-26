@@ -3,47 +3,116 @@
 import { useParams } from "next/navigation";
 import useSWR from "swr";
 
+interface OrderItem {
+  id: number;
+  quantity: number;
+  price: number;
+  product: {
+    name: string;
+    image_url?: string | null;
+  };
+}
+
+interface OrderDetails {
+  id: number;
+  status: string;
+  payment_status: string;
+  total: number;
+  items: OrderItem[];
+}
+
 const fetcher = (url: string) =>
-  fetch(url, { credentials: "include" }).then(r => r.json());
+  fetch(url, { credentials: "include" }).then((r) => r.json());
 
 export default function OrderDetailsPage() {
-
   const params = useParams();
   const id = params?.id as string | undefined;
 
-  const { data, isLoading } = useSWR(
+  const { data, isLoading } = useSWR<OrderDetails>(
     id ? `/api/order/${id}` : null,
     fetcher
   );
 
-  if (isLoading) return <p className="p-20">Loading...</p>;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-zinc-400 animate-pulse">
+        Loading order...
+      </div>
+    );
+  }
 
-  if (!data) return <p className="p-20">Order not found</p>;
+  if (!data||data.id===undefined) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-zinc-400">
+        Order not found
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-4xl mx-auto p-10">
+    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black px-4 sm:px-8 py-12 text-white">
 
-      <h1 className="text-xl font-bold mb-4">
-        Order #{data.id}
-      </h1>
+      <div className="max-w-4xl mx-auto bg-zinc-900 border border-zinc-800 rounded-2xl p-6 sm:p-8 shadow-xl animate-scale-in">
 
-      <p>Status: {data.status}</p>
-      <p>Payment: {data.payment_status}</p>
+        <div className="flex justify-between items-center flex-wrap gap-4 mb-6">
 
-      <hr className="my-4" />
+          <h1 className="text-2xl font-bold">
+            Order #{data.id}
+          </h1>
 
-      {data.items.map((item: any) => (
-        <div key={item.id} className="flex justify-between mb-3">
-          <p>{item.product.name} × {item.quantity}</p>
-          <p>₹ {item.price * item.quantity}</p>
+          <div className="flex gap-3">
+
+            <span className="bg-zinc-800 px-3 py-1 rounded-full text-sm">
+              {data.status}
+            </span>
+
+            <span className="bg-zinc-800 px-3 py-1 rounded-full text-sm">
+              {data.payment_status}
+            </span>
+
+          </div>
+
         </div>
-      ))}
 
-      <hr className="my-4" />
+        <div className="space-y-4 border-t border-zinc-800 pt-5">
 
-      <h2 className="font-bold">
-        Total: ₹ {data.total}
-      </h2>
+          {data.items.map((item) => (
+            <div
+              key={item.id}
+              className="flex justify-between items-center bg-zinc-800/60 p-4 rounded-xl"
+            >
+              <div>
+                <p className="font-medium">
+                  {item.product.name}
+                </p>
+
+                <p className="text-sm text-zinc-400">
+                  Qty: {item.quantity}
+                </p>
+              </div>
+
+              <p className="font-semibold text-green-400">
+                ₹ {item.price * item.quantity}
+              </p>
+
+            </div>
+          ))}
+
+        </div>
+
+        <div className="border-t border-zinc-800 mt-6 pt-5 flex justify-between items-center">
+
+          <p className="text-lg font-medium">
+            Total Amount
+          </p>
+
+          <p className="text-2xl font-bold text-green-400">
+            ₹ {data.total}
+          </p>
+
+        </div>
+
+      </div>
 
     </div>
   );
