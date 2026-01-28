@@ -14,31 +14,40 @@ export default function SignupPage() {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  type SignUpResponse = {
+    success: true;
+  }
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    const res = await apifetch("/auth/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, email, password }),
-    });
+  try{  
+    const res = await apifetch<SignUpResponse>("/auth/signup", {
+        method: "POST",
+        body: JSON.stringify({ username, email, password }),
+      });
 
-    setLoading(false);
+      setLoading(false);
 
-    if (!res.ok) {
-      const data = await res.json();
-      setError(data.message || "Signup failed");
-      return;
+      if (!res.ok) {
+        setError(res.message || "Signup failed");
+        return;
+      }
+
+      setSuccess(true);
+
+      setTimeout(() => {
+        router.push("/login");
+      }, 2000);
+    } catch (err) {
+      console.error("Signup error:", err);
+      setError("An unexpected error occurred");
+    }finally {
+      setLoading(false);
     }
-
-    setSuccess(true);
-
-    setTimeout(() => {
-      router.push("/login");
-    }, 8500);
   };
 
   return (

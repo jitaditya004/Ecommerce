@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import cloudinary from "@/lib/cloudinary";
 import { serializeProduct } from "@/helper/serializeProduct";
+import type { UploadApiResponse } from "cloudinary";
 
 
 export async function GET() {
@@ -33,12 +34,12 @@ export async function POST(req: Request) {
       const bytes = await image.arrayBuffer();
       const buffer = Buffer.from(bytes);
 
-      const uploadResult = await new Promise<any>((resolve, reject) => {
+      const uploadResult = await new Promise<UploadApiResponse>((resolve, reject) => {
         cloudinary.uploader.upload_stream(
           { folder: "products" },
           (error, result) => {
             if (error) reject(error);
-            resolve(result);
+            resolve(result as UploadApiResponse);
           }
         ).end(buffer);
       });

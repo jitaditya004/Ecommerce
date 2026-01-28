@@ -2,6 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { apifetch } from "@/lib/apiFetch";
+
+type AddProductResponse = {
+  success: true;
+};
 
 export default function AddProductPage() {
   const router = useRouter();
@@ -12,7 +17,7 @@ export default function AddProductPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setLoading(true);
@@ -23,15 +28,13 @@ export default function AddProductPage() {
       form.append("price", price);
       if (image) form.append("image", image);
 
-      const res = await fetch("/api/admin/products", {
+      const res = await apifetch<AddProductResponse>("/admin/products", {
         method: "POST",
         body: form,
       });
 
-      const data = await res.json();
-
       if (!res.ok) {
-        setError(data.error || "Failed to create product");
+        setError(res.message || "Failed to create product");
         setLoading(false);
         return;
       }

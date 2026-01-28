@@ -1,6 +1,7 @@
 export const runtime = "nodejs";
 
 import { prisma } from "@/lib/prisma";
+import {Prisma} from "@prisma/client";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
@@ -12,7 +13,7 @@ export async function GET(req: Request) {
 
   const skip = (page - 1) * limit;
 
-  let orderBy: any = { created_at: "desc" };
+  let orderBy: Prisma.productsOrderByWithRelationInput = { created_at: "desc" };
 
   if (sort === "price_asc") orderBy = { price: "asc" };
   if (sort === "price_desc") orderBy = { price: "desc" };
@@ -20,9 +21,7 @@ export async function GET(req: Request) {
   if (sort === "reviews") {
     orderBy = {
       reviews: {
-        _avg: {
-          rating: "desc",
-        },
+        _count: "desc",
       },
     };
   }

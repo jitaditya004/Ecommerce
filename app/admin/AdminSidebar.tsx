@@ -14,7 +14,7 @@ export default function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 hidden md:flex flex-col border-r border-zinc-800 bg-zinc-900 sticky top-0 h-screen">
+    <aside className="w-64 hidden md:flex flex-col border-r border-zinc-800 bg-zinc-900">
 
       <div className="p-5 border-b border-zinc-800">
         <h2 className="text-lg font-bold tracking-wide">

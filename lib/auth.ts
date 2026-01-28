@@ -17,7 +17,7 @@ export function createRefreshToken(user: {
   user_id: bigint;
 }) {
   return jwt.sign(
-    { userId: user.user_id.toString() },
+    { userId: user.user_id.toString(), },
     process.env.REFRESH_TOKEN_SECRET!,
     { expiresIn: "7d" }
   );

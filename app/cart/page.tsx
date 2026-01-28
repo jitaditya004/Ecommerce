@@ -3,12 +3,12 @@
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/hooks/useCart";
 import { mutate } from "swr";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 
 export default function CartPage() {
   const { user, loading } = useAuth();
   const { items, totalPrice, isLoading } = useCart();
-  const router = useRouter();
+  // const router = useRouter();
 
   if (loading) {
     return (
@@ -43,7 +43,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black px-4 sm:px-10 py-12 text-white">
+    <div className="min-h-screen bg-linear-to-br from-zinc-950 via-zinc-900 to-black px-4 sm:px-10 py-12 text-white">
 
       <div className="max-w-5xl mx-auto">
 
@@ -80,7 +80,7 @@ export default function CartPage() {
                     -
                   </button>
 
-                  <span className="min-w-[24px] text-center">
+                  <span className="min-w-6 text-center">
                     {item.quantity}
                   </span>
 

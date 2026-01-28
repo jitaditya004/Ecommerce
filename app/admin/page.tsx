@@ -23,7 +23,7 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black flex items-center justify-center px-4">
+    <div className="h-screen overflow-hidden bg-gradient-to-br from-zinc-950 via-zinc-900 to-black flex items-center justify-center px-4">
 
       <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 sm:p-10 text-center shadow-xl animate-scale-in">
 

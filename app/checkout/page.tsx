@@ -3,6 +3,12 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useCart } from "@/hooks/useCart";
+import { apifetch } from "@/lib/apiFetch";
+
+type CreateOrderResponse = {
+  orderId: string;
+};
+
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -13,17 +19,23 @@ export default function CheckoutPage() {
     try {
       setLoading(true);
 
-      const res = await fetch("/api/order/create", {
+      const res = await apifetch<CreateOrderResponse>("/order/create", {
         method: "POST",
         credentials: "include",
       });
 
-      const data = await res.json();
-
-      if (data.orderId) {
-        router.push(`/payment?orderId=${data.orderId}`);
+      if (!res.ok) {
+        throw new Error(res.message);
       }
-    } finally {
+
+      if (res.data.orderId) {
+        router.push(`/payment?orderId=${res.data.orderId}`);
+      }
+    } catch (error) {
+      console.error("Error creating order:", error);
+      alert("Failed to create order. Please try again.");
+    }
+     finally {
       setLoading(false);
     }
   };
@@ -45,7 +57,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black px-4 sm:px-10 py-12 text-white">
+    <div className="min-h-screen bg-linear-to-br from-zinc-950 via-zinc-900 to-black px-4 sm:px-10 py-12 text-white">
 
       <div className="max-w-3xl mx-auto bg-zinc-900 border border-zinc-800 rounded-2xl p-6 sm:p-8 shadow-xl animate-scale-in">
 
@@ -92,6 +104,7 @@ export default function CheckoutPage() {
         </div>
 
         <button
+          type="button"
           onClick={createOrder}
           disabled={loading}
           className="w-full mt-6 bg-white text-black py-3 rounded-full font-medium hover:scale-105 transition disabled:opacity-60"

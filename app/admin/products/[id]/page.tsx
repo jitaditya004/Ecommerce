@@ -3,6 +3,17 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
+import { apifetch } from "@/lib/apiFetch";
+
+type EditProductResponse = {
+  name: string;
+  price: number;
+};
+
+type UpdateProductResponse = {
+  success: true;
+};
+
 
 export default function EditProduct() {
   const params = useParams();
@@ -15,13 +26,24 @@ export default function EditProduct() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/admin/products/${id}`)
-      .then(r => r.json())
-      .then(d => {
-        setName(d.name);
-        setPrice(d.price);
-      });
+    const loadProduct = async () => {
+
+      const res = await apifetch<EditProductResponse>(
+        `/admin/products/${id}`
+      );
+
+      if (!res.ok) {
+        console.error(res.message);
+        return;
+      }
+
+      setName(res.data.name);
+      setPrice(String(res.data.price));
+    };
+
+    loadProduct();
   }, [id]);
+
 
 const handleUpdate = async (e: React.FormEvent) => {
   e.preventDefault();
@@ -36,14 +58,14 @@ const handleUpdate = async (e: React.FormEvent) => {
       form.append("image", image);
     }
 
-    const res = await fetch(`/api/admin/products/${id}`, {
+    const res = await apifetch<UpdateProductResponse>(`/admin/products/${id}`, {
       method: "PUT",
       body: form,
     });
 
     if (!res.ok) {
-      const err = await res.json();
-      console.error(err.message || "Update failed");
+      console.error(res.message || "Update failed");
+      throw new Error(res.message);
     }
 
 

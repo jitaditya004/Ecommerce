@@ -1,34 +1,63 @@
 "use client";
 
-import useSWR from "swr";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
+import { apifetch } from "@/lib/apiFetch";
 
-const fetcher = (url: string) =>
-  fetch(url).then(res => res.json());
+interface AdminProduct {
+  product_id: string;
+  name: string;
+  price: number;
+};
 
-export default function AdminProductsPage() {
-  const { data, error, isLoading, mutate } = useSWR(
-    "/api/admin/products",
-    fetcher
+type AdminProductsResponse = {
+  products: AdminProduct[];
+};
+
+const fetchProducts = async (): Promise<AdminProductsResponse> => {
+  const res = await apifetch<AdminProductsResponse>("/admin/products");
+
+  if (!res.ok) {
+    throw new Error(res.message);
+  }
+
+  return res.data;
+};
+
+const deleteProduct = async (id: string): Promise<void> => {
+  const res = await apifetch<{ success: true }>(
+    `/admin/products/${id}`,
+    { method: "DELETE" }
   );
 
-  const handleDelete = async (id: string) => {
-    await fetch(`/api/admin/products/${id}`, {
-      method: "DELETE",
-    });
+  if (!res.ok) {
+    throw new Error(res.message);
+  }
+};
 
-    mutate();
-  };
+export default function AdminProductsPage() {
+
+  const queryClient = useQueryClient();
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["admin-products"],
+    queryFn: fetchProducts,
+  });
+
+  const { mutate: removeProduct, isPending } = useMutation({
+    mutationFn: deleteProduct,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["admin-products"],
+      });
+    },
+  });
 
   if (isLoading) {
     return <p className="text-zinc-400">Loading...</p>;
   }
 
-  if (error) {
-    return <p className="text-red-400">Failed to load products</p>;
-  }
-
-  if (!data || !data.products || data.products.length === 0) {
+  if (isError || !data || data.products.length === 0) {
     return <p className="text-zinc-400">No products found</p>;
   }
 
@@ -48,7 +77,7 @@ export default function AdminProductsPage() {
 
       <div className="space-y-4">
 
-        {data.products.map((p: any) => (
+        {data.products.map((p) => (
           <div
             key={p.product_id}
             className="bg-zinc-900 border border-zinc-800 p-4 rounded-xl flex justify-between items-center"
@@ -67,8 +96,9 @@ export default function AdminProductsPage() {
               </Link>
 
               <button
-                onClick={() => handleDelete(p.product_id)}
-                className="text-red-400"
+                disabled={isPending}
+                onClick={() => removeProduct(p.product_id)}
+                className="text-red-400 disabled:opacity-60"
               >
                 Delete
               </button>

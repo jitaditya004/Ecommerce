@@ -5,6 +5,8 @@ import cloudinary from "@/lib/cloudinary";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { serializeProduct } from "@/helper/serializeProduct";
+import type { UploadApiResponse } from "cloudinary";
+
 
 function getPublicId(url: string) {
   const parts = url.split("/");
@@ -52,12 +54,12 @@ export async function PUT(req: Request, context: { params: Promise<{ id: string 
       const bytes = await image.arrayBuffer();
       const buffer = Buffer.from(bytes);
 
-      const upload = await new Promise<any>((resolve, reject) => {
+      const upload = await new Promise<UploadApiResponse>((resolve, reject) => {
         cloudinary.uploader.upload_stream(
           { folder: "products" },
           (err, result) => {
             if (err) reject(err);
-            resolve(result);
+            resolve(result as UploadApiResponse);
           }
         ).end(buffer);
       });

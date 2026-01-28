@@ -40,7 +40,7 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black px-4 sm:px-8 py-12 text-white">
+    <div className="min-h-screen bg-linear-to-br from-zinc-950 via-zinc-900 to-black px-4 sm:px-8 py-12 text-white">
 
       <div className="max-w-5xl mx-auto">
 

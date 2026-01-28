@@ -1,6 +1,7 @@
 import cloudinary from "@/lib/cloudinary";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import type { UploadApiResponse } from "cloudinary";
 
 export async function POST(req: Request) {
   const formData = await req.formData();
@@ -24,12 +25,12 @@ export async function POST(req: Request) {
       const bytes = await image.arrayBuffer();
       const buffer = Buffer.from(bytes);
 
-      const upload = await new Promise<any>((resolve, reject) => {
+      const upload = await new Promise<UploadApiResponse>((resolve, reject) => {
         cloudinary.uploader.upload_stream(
           { folder: "products" },
           (err, result) => {
             if (err) reject(err);
-            resolve(result);
+            resolve(result as UploadApiResponse);
           }
         ).end(buffer);
       });

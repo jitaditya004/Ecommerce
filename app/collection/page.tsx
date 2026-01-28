@@ -1,35 +1,47 @@
 import ProductGrid from "@/components/ProductGrid";
 import Controls from "@/components/Controls";
 import { Suspense } from "react";
+import { apifetch } from "@/lib/apiFetch";
+import { Product } from "@/types/product";
 
-async function getProducts(searchParams: Promise<any>) {
+interface ProductsResponse {
+  products: Product[];
+  total: number;
+};
+
+type GetProductsResult = {
+  products: Product[];
+  total: number;
+  error: boolean;
+};
+
+type CollectionSearchParams = {
+  page?: string;
+  limit?: string;
+  sort?: string;
+};
+
+
+async function getProducts(searchParams: Promise<CollectionSearchParams>): Promise<GetProductsResult> {
   const page = (await searchParams).page ?? "1";
   const limit = (await searchParams).limit ?? "12";
   const sort = (await searchParams).sort ?? "recent";
 
-  const res = await fetch(
-    `http://localhost:3000/api/products?page=${page}&limit=${limit}&sort=${sort}`,
+  const res = await apifetch<ProductsResponse>(
+    `/products?page=${page}&limit=${limit}&sort=${sort}`,
     { cache: "no-store" }
   );
 
   if (!res.ok) {
-    return {
-      products: [],
-      total: 0,
-      error: true,
-    };
+    console.error(`Failed to fetch products: ${res.status} - ${res.message}`);
+    throw new Error("Failed to fetch products");
   }
 
-  const data = await res.json();
-
-  return {
-    ...data,
-    error: false,
-  };
+  return res.data ? { products: res.data.products, total: res.data.total, error: false } : { products: [], total: 0, error: true };
 }
 
 
-export default async function CollectionPage({ searchParams }: any) {
+export default async function CollectionPage({ searchParams }: { searchParams: Promise<CollectionSearchParams> }) {
   const { products, total,error } = await getProducts(searchParams);
 
   if (error) {
@@ -52,7 +64,7 @@ export default async function CollectionPage({ searchParams }: any) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black px-4 sm:px-10 py-12 text-white">
+    <div className="min-h-screen bg-linear-to-br from-zinc-950 via-zinc-900 to-black px-4 sm:px-10 py-12 text-white">
 
       <div className="max-w-7xl mx-auto">
 

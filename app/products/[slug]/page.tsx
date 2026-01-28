@@ -40,14 +40,14 @@ export default async function ProductPage({
     const imageSrc = product.image_url || "/placeholder.png";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black px-4 sm:px-10 py-12">
+    <div className="min-h-screen bg-linear-to-br from-zinc-950 via-zinc-900 to-black px-4 sm:px-10 py-12">
 
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
 
         {/* IMAGE SECTION */}
-        <div className="relative bg-zinc-900 border border-zinc-800 rounded-2xl h-[320px] sm:h-[420px] flex items-center justify-center overflow-hidden group">
+        <div className="relative bg-zinc-900 border border-zinc-800 rounded-2xl h-80 sm:h-105 flex items-center justify-center overflow-hidden group">
 
-          <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-br from-white/5 to-transparent" />
 
           <div className="text-zinc-500">
             <Image

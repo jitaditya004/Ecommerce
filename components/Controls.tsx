@@ -33,7 +33,7 @@ export default function Controls({ total }: { total: number }) {
           <option value="price_asc">Price Low → High</option>
           <option value="price_desc">Price High → Low</option>
           <option value="name_asc">Name A-Z</option>
-          <option value="reviews">Top Rated</option>
+          <option value="reviews">Reviews Count</option>
         </select>
 
         <select
