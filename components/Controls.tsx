@@ -24,6 +24,7 @@ export default function Controls({ total }: { total: number }) {
       <div className="flex gap-3 flex-wrap">
 
         <select
+          title="Sort By"
           value={sort}
           onChange={(e) => update("sort", e.target.value)}
           className="bg-zinc-900 border border-zinc-800 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-white transition"
@@ -36,6 +37,7 @@ export default function Controls({ total }: { total: number }) {
         </select>
 
         <select
+          title="Items Per Page"
           value={String(limit)}
           onChange={(e) => update("limit", e.target.value)}
           className="bg-zinc-900 border border-zinc-800 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-white transition"

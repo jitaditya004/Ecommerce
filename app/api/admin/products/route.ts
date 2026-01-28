@@ -1,6 +1,23 @@
-import cloudinary from "@/lib/cloudinary";
-import { prisma } from "@/lib/prisma";
+export const runtime = "nodejs";
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import cloudinary from "@/lib/cloudinary";
+import { serializeProduct } from "@/helper/serializeProduct";
+
+
+export async function GET() {
+  const products = await prisma.products.findMany({
+    orderBy: { created_at: "desc" },
+  });
+
+  const formatted = products.map(p => ({
+    ...p,
+    product_id: Number(p.product_id),
+  }));
+
+  return NextResponse.json({ products: formatted });
+}
+
 
 export async function POST(req: Request) {
   const formData = await req.formData();
@@ -13,30 +30,25 @@ export async function POST(req: Request) {
 
   if (image) {
     try {
-      if (!image.type.startsWith("image/")) {
-        return NextResponse.json({ error: "Invalid file type" }, { status: 400 });
-      }
-
-      if (image.size > 2_000_000) {
-        return NextResponse.json({ error: "File too large" }, { status: 400 });
-      }
-
       const bytes = await image.arrayBuffer();
       const buffer = Buffer.from(bytes);
 
-      const upload = await new Promise<any>((resolve, reject) => {
+      const uploadResult = await new Promise<any>((resolve, reject) => {
         cloudinary.uploader.upload_stream(
           { folder: "products" },
-          (err, result) => {
-            if (err) reject(err);
+          (error, result) => {
+            if (error) reject(error);
             resolve(result);
           }
         ).end(buffer);
       });
 
-      imageUrl = upload.secure_url;
+      imageUrl = uploadResult.secure_url;
+
     } catch (err) {
       console.error("Cloudinary upload failed:", err);
+
+      // Optional: still allow product creation
       imageUrl = null;
     }
   }
@@ -50,9 +62,5 @@ export async function POST(req: Request) {
     },
   });
 
-  return NextResponse.json(
-    { success: true, product },
-    { status: 201 }
-  );
-
+  return NextResponse.json(serializeProduct(product));
 }

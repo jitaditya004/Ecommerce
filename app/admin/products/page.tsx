@@ -3,10 +3,14 @@
 import useSWR from "swr";
 import Link from "next/link";
 
-const fetcher = (url: string) => fetch(url).then(r => r.json());
+const fetcher = (url: string) =>
+  fetch(url).then(res => res.json());
 
 export default function AdminProductsPage() {
-  const { data, isLoading, mutate } = useSWR("/api/admin/products", fetcher);
+  const { data, error, isLoading, mutate } = useSWR(
+    "/api/admin/products",
+    fetcher
+  );
 
   const handleDelete = async (id: string) => {
     await fetch(`/api/admin/products/${id}`, {
@@ -18,6 +22,14 @@ export default function AdminProductsPage() {
 
   if (isLoading) {
     return <p className="text-zinc-400">Loading...</p>;
+  }
+
+  if (error) {
+    return <p className="text-red-400">Failed to load products</p>;
+  }
+
+  if (!data || !data.products || data.products.length === 0) {
+    return <p className="text-zinc-400">No products found</p>;
   }
 
   return (

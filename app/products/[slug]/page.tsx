@@ -6,30 +6,26 @@ import { apifetch } from "@/lib/apiFetch";
 import Image from "next/image";
 import { Product } from "@/types/product";
 
-// async function getProduct(slug: string) {
-//   const res = await apifetch(
-//     `/products/${slug}`,
-//     { cache: "no-store" }
-//   );
+type ProductPageResponse = {
+  formatProduct: Product;
+  avgRating: number;
+};
 
-//   if (!res.ok) {
-//     throw new Error("Product not found");
-//   }
 
-//   return res.json();
-// }
-
-async function getProduct(slug: string) {
-  const res = await apifetch(
+async function getProduct(slug: string): Promise<ProductPageResponse> {
+  const res = await apifetch<ProductPageResponse>(
     `/products/${slug}`,
     { cache: "no-store" }
   );
-   if (!res.ok) {
-    throw new Error("Product not found");
+
+  if (!res.ok) {
+    console.error(`Failed to fetch product: ${res.status} - ${res.message}`);
+    throw new Error("Failed to fetch product data");
   }
 
-  return res.json();
+  return res.data;
 }
+
 
 export default async function ProductPage({
   params,

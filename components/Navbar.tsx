@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCart } from "@/hooks/useCart";
 import { useState } from "react";
+import { useEffect } from "react";
 
 const NAV_ITEMS = [
   { label: "Home", href: "/" },
@@ -24,6 +25,8 @@ export default function Navbar({ onToggleSearch }: NavbarProps) {
   const pathname = usePathname();
   const { count } = useCart();
   const [open, setOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
 
   if (loading) return null;
 
@@ -98,32 +101,73 @@ export default function Navbar({ onToggleSearch }: NavbarProps) {
 
           {!user ? (
             <div className="hidden sm:flex items-center gap-4">
-              <Link
-                href="/login"
-                className="text-zinc-400 hover:text-white transition"
-              >
+              <Link href="/login" className="text-zinc-400 hover:text-white">
                 Login
               </Link>
 
               <Link
                 href="/signup"
-                className="bg-white text-black px-4 py-2 rounded-full font-medium hover:scale-105 transition"
+                className="bg-white text-black px-4 py-2 rounded-full font-medium"
               >
                 Sign up
               </Link>
             </div>
           ) : (
-            <div className="hidden sm:flex items-center gap-4">
-              <span className="text-zinc-400">{user.name}</span>
+            <div className="relative hidden sm:block">
 
               <button
-                onClick={logout}
-                className="text-red-500 hover:text-red-400 transition"
+                onClick={() => setMenuOpen(v => !v)}
+                className="flex items-center gap-2 hover:text-white"
               >
-                Logout
+                {user.name}
+                <span className="text-xs">▾</span>
               </button>
+
+              {menuOpen && (
+                <div className="absolute right-0 mt-3 w-48 bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+
+                  <Link
+                    href="/profile"
+                    onClick={() => setMenuOpen(false)}
+                    className="block px-4 py-2 hover:bg-zinc-800"
+                  >
+                    Profile
+                  </Link>
+
+                  <Link
+                    href="/settings"
+                    onClick={() => setMenuOpen(false)}
+                    className="block px-4 py-2 hover:bg-zinc-800"
+                  >
+                    Settings
+                  </Link>
+
+                  {user.role === "ADMIN" && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setMenuOpen(false)}
+                      className="block px-4 py-2 text-yellow-400 hover:bg-zinc-800"
+                    >
+                      Admin Dashboard
+                    </Link>
+                  )}
+
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                      logout();
+                    }}
+                    className="w-full text-left px-4 py-2 text-red-500 hover:bg-zinc-800"
+                  >
+                    Logout
+                  </button>
+
+                </div>
+              )}
+
             </div>
           )}
+
 
           <button
             onClick={() => setOpen(!open)}
@@ -135,42 +179,78 @@ export default function Navbar({ onToggleSearch }: NavbarProps) {
         </div>
       </div>
 
-      {open && (
-        <div className="md:hidden bg-zinc-900 border-t border-zinc-800 px-6 py-4 space-y-4 text-zinc-300">
+    {open && (
+      <div className="md:hidden absolute left-0 right-0 top-full bg-zinc-900 border-b border-zinc-800 px-6 py-5 space-y-4 animate-slideDown">
 
-          {NAV_ITEMS.map((item) => {
-            
+        {NAV_ITEMS.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            onClick={() => setOpen(false)}
+            className="block text-lg hover:text-white"
+          >
+            {item.label}
+          </Link>
+        ))}
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setOpen(false)}
-                className="block hover:text-white transition"
-              >
-                {item.label}
-              </Link>
-            );
-          })}
+        <div className="border-t border-zinc-800 pt-4">
 
           {!user ? (
-            <div className="flex flex-col gap-3 pt-2">
-              <Link href="/login">Login</Link>
-              <Link href="/signup" className="bg-white text-black px-4 py-2 rounded-full text-center">
+            <div className="flex flex-col gap-3">
+
+              <Link href="/login" onClick={() => setOpen(false)}>
+                Login
+              </Link>
+
+              <Link
+                href="/signup"
+                onClick={() => setOpen(false)}
+                className="bg-white text-black px-4 py-2 rounded-full text-center"
+              >
                 Sign up
               </Link>
+
             </div>
           ) : (
-            <button
-              onClick={logout}
-              className="text-red-500"
-            >
-              Logout
-            </button>
+            <div className="space-y-3 flex flex-col gap-3">
+
+              <Link href="/profile" onClick={() => setOpen(false)}>
+                Profile
+              </Link>
+
+              <Link href="/settings" onClick={() => setOpen(false)}>
+                Settings
+              </Link>
+
+              {user.role === "ADMIN" && (
+                <Link
+                  href="/admin"
+                  onClick={() => setOpen(false)}
+                  className="text-yellow-400"
+                >
+                  Admin Dashboard
+                </Link>
+              )}
+
+              <button
+                onClick={() => {
+                  setOpen(false);
+                  logout();
+                }}
+                className="text-left text-red-500"
+              >
+                Logout
+              </button>
+
+            </div>
           )}
 
         </div>
-      )}
+
+      </div>
+    )}
+
+
 
     </nav>
   );
