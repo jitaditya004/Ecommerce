@@ -1,7 +1,12 @@
 "use client";
 
-import { useCart } from "@/hooks/useCart";
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { apifetch } from "@/lib/apiFetch";
+
+type AddToCartResponse = {
+  success: true;
+};
 
 type Props = {
   productId: number;
@@ -12,19 +17,18 @@ export default function AddToCartButton({
   productId,
   disabled,
 }: Props) {
-  const { mutate } = useCart();
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [showToast, setShowToast] = useState<null | "success" | "error">(null);
 
   const handleAdd = async () => {
-    if (loading) return;
+    if (loading || disabled) return;
 
     try {
       setLoading(true);
 
-      const res = await fetch("/api/cart/add", {
+      const res = await apifetch<AddToCartResponse>("/cart/add", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
           productId,
@@ -34,15 +38,19 @@ export default function AddToCartButton({
 
       if (!res.ok) {
         setShowToast("error");
-        return;
+        throw new Error(res.message); 
       }
 
-      await mutate();
+      await queryClient.invalidateQueries({ queryKey: ["cart"] });
       setShowToast("success");
 
       setTimeout(() => setShowToast(null), 1500);
 
-    } finally {
+    } catch (err) {
+      console.error("Add to cart error:", err);
+      setShowToast("error");
+    } 
+    finally {
       setLoading(false);
     }
   };

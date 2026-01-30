@@ -5,24 +5,38 @@ import {
   createAccessToken,
   createRefreshToken,
 } from "@/lib/auth";
+import { Role } from "@/types/auth";
+
+function isRole(value: unknown): value is Role {
+  return value === "USER" || value === "ADMIN";
+}
 
 export async function POST(req: Request) {
-  try {
-    const { email, password } = await req.json();
 
- 
+  try {
+    const body = await req.json();
+
+    const email = String(body.email);
+    const password = String(body.password);
+
     const user = await prisma.users.findUnique({
       where: { email },
+      select: {
+        user_id: true,
+        email: true,
+        username: true,
+        password_hash: true,
+        role: true,
+      },
     });
 
-    if (!user) {
+    if (!user || !isRole(user.role)) {
       return NextResponse.json(
         { message: "Invalid credentials" },
         { status: 401 }
       );
     }
 
-  
     const valid = await bcrypt.compare(
       password,
       user.password_hash
@@ -35,18 +49,18 @@ export async function POST(req: Request) {
       );
     }
 
-
     const accessToken = createAccessToken({
       user_id: user.user_id,
       role: user.role,
       email: user.email,
-      name: user.username
+      name: user.username,
     });
-    const refreshToken = createRefreshToken(user);
 
+    const refreshToken = createRefreshToken({
+      user_id: user.user_id,
+    });
 
     const res = NextResponse.json({
-      accessToken,
       user: {
         id: Number(user.user_id),
         email: user.email,
@@ -55,13 +69,15 @@ export async function POST(req: Request) {
       },
     });
 
+    console.log("Response:", res, "Refresh Token:", refreshToken, "Access Token:", accessToken);
+
     res.cookies.set("access", accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      maxAge: Number(process.env.ACCESS_TOKEN_EXPIRY),
-      priority: "high"
+      maxAge: Number(process.env.ACCESS_TOKEN_EXPIRY ?? 15 * 60),
+      priority: "high",
     });
 
     res.cookies.set("refresh", refreshToken, {
@@ -69,18 +85,20 @@ export async function POST(req: Request) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      maxAge: Number(process.env.REFRESH_TOKEN_EXPIRY),
-      priority: "high"
+      maxAge: Number(process.env.REFRESH_TOKEN_EXPIRY ?? 7 * 24 * 60 * 60),
+      priority: "high",
     });
 
     return res;
 
   } catch (error) {
-    console.error(error);
+
+    console.error("Login error:", error);
 
     return NextResponse.json(
       { message: "Server error" },
       { status: 500 }
     );
   }
+
 }

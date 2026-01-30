@@ -51,7 +51,7 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-zinc-950 via-zinc-900 to-black px-4 overflow-hidden">
+    <div className="relative min-h-screen flex items-center justify-center bg-linear-to-br from-zinc-950 via-zinc-900 to-black px-4 overflow-hidden">
 
       {loading && (
         <div className="fixed top-6 right-6 z-50 bg-zinc-900 border border-zinc-800 rounded-xl px-5 py-4 shadow-xl w-64 overflow-hidden">

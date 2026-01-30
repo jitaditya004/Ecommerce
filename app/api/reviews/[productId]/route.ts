@@ -26,13 +26,13 @@ export async function GET(
     },
   });
 
-  return NextResponse.json(
-    reviews.map(r => ({
+  return NextResponse.json({
+    reviews: reviews.map(r => ({
       id: Number(r.id),
       rating: r.rating,
       content: r.content,
       user: r.users?.username,
       created_at: r.created_at,
     }))
-  );
+});
 }

@@ -52,6 +52,7 @@ export default function Controls({ total }: { total: number }) {
       <div className="flex items-center gap-3 text-sm">
 
         <button
+          type="button"
           disabled={page === 1}
           onClick={() => update("page", String(page - 1))}
           className="px-3 py-1.5 rounded-lg border border-zinc-700 hover:bg-zinc-800 transition disabled:opacity-40 disabled:cursor-not-allowed"
@@ -64,6 +65,7 @@ export default function Controls({ total }: { total: number }) {
         </span>
 
         <button
+          type="button"
           disabled={page === totalPages}
           onClick={() => update("page", String(page + 1))}
           className="px-3 py-1.5 rounded-lg border border-zinc-700 hover:bg-zinc-800 transition disabled:opacity-40 disabled:cursor-not-allowed"

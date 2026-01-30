@@ -7,12 +7,15 @@ import { useEffect } from "react";
 export default function AdminPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  
 
   useEffect(() => {
     if (!loading && (!user || user.role !== "ADMIN")) {
       router.push("/");
     }
   }, [user, loading, router]);
+
+  console.log("AdminPage - user:", user, "loading:", loading);
 
   if (loading) {
     return (

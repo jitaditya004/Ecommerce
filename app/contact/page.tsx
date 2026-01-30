@@ -1,6 +1,6 @@
 export default function ContactPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black px-4 sm:px-10 py-16 text-white">
+    <div className="min-h-screen bg-linear-to-br from-zinc-950 via-zinc-900 to-black px-4 sm:px-10 py-16 text-white">
 
       <div className="max-w-3xl mx-auto text-center mb-12">
         <h1 className="text-4xl font-bold mb-4">
@@ -26,7 +26,7 @@ export default function ContactPage() {
           <div className="text-2xl mb-3">📞</div>
           <p className="font-medium">Phone</p>
           <p className="text-zinc-400 text-sm mt-1">
-            +91 9876543210
+            +91 1234567890
           </p>
         </div>
 
@@ -39,6 +39,15 @@ export default function ContactPage() {
         </div>
 
       </div>
+      <div className="max-w-3xl mx-auto text-center mt-10">
+        <a
+          href="/report-issue"
+          className="inline-block bg-white text-black px-6 py-3 rounded-full font-medium hover:scale-105 transition"
+        >
+          🚨 Report an Issue
+        </a>
+      </div>
+
 
     </div>
   );

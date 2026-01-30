@@ -1,8 +1,17 @@
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 
-export async function getAdminFromRequest() {
-  const token = (await cookies()).get("access")?.value;
+type AccessTokenPayload = {
+  user_id: string;
+  role: "USER" | "ADMIN";
+  email: string;
+  name: string;
+};
+
+export async function getAdminFromRequest(): Promise<string | null> {
+
+  const cookieStore = await cookies();
+  const token = cookieStore.get("access")?.value;
 
   if (!token) return null;
 
@@ -10,15 +19,16 @@ export async function getAdminFromRequest() {
     const payload = jwt.verify(
       token,
       process.env.ACCESS_TOKEN_SECRET!
-    ) as { userId: string; role: string };
+    ) as AccessTokenPayload;
 
-    
+    if (payload.role !== "ADMIN") {
+      return null;
+    }
 
-    if (payload.role !== "ADMIN") return null;
+    return payload.user_id.toString();
 
-    return payload.userId;
-
-  } catch {
+  } catch (error) {
+    console.error("Error verifying admin token:", error);
     return null;
   }
 }

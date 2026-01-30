@@ -2,13 +2,82 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/hooks/useCart";
-import { mutate } from "swr";
-// import { useRouter } from "next/navigation";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apifetch } from "@/lib/apiFetch";
+import { useRouter } from "next/navigation";
 
 export default function CartPage() {
   const { user, loading } = useAuth();
-  const { items, totalPrice, isLoading } = useCart();
-  // const router = useRouter();
+  const { items, isLoading, totalPrice } = useCart();
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const updateQtyMutation = useMutation({
+    mutationFn: async ({
+      id,
+      delta,
+    }: {
+      id: number;
+      delta: number;
+    }) => {
+
+      const res = await apifetch("/cart/update", {
+        method: "POST",
+        body: JSON.stringify({ id, delta }),
+      });
+
+      if (!res.ok) {
+        throw new Error(res.message);
+      }
+    },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["cart"],
+      });
+    },
+  });
+
+  // ---------- Remove item ----------
+  const removeItemMutation = useMutation({
+    mutationFn: async (id: number) => {
+
+      const res = await apifetch("/cart/remove", {
+        method: "POST",
+        body: JSON.stringify({ id }),
+      });
+
+      if (!res.ok) {
+        throw new Error(res.message);
+      }
+    },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["cart"],
+      });
+    },
+  });
+
+  
+  const checkoutMutation = useMutation({
+    mutationFn: async () => {
+
+      const res = await apifetch<{ orderId: number }>("/order/create", {
+        method: "POST",
+      });
+
+      if (!res.ok) {
+        throw new Error(res.message);
+      }
+
+      return res.data;
+    },
+
+    onSuccess: (data) => {
+      router.push(`/checkout?orderId=${data.orderId}`);
+    },
+  });
 
   if (loading) {
     return (
@@ -74,7 +143,8 @@ export default function CartPage() {
                 <div className="flex items-center gap-3 mt-3">
 
                   <button
-                    onClick={() => updateQty(item.id, -1)}
+                    type="button"
+                    onClick={() => updateQtyMutation.mutate({ id: item.id, delta: -1 })}
                     className="w-8 h-8 rounded-full border border-zinc-700 hover:bg-zinc-800 transition"
                   >
                     -
@@ -85,14 +155,14 @@ export default function CartPage() {
                   </span>
 
                   <button
-                    onClick={() => updateQty(item.id, 1)}
+                    onClick={() => updateQtyMutation.mutate({ id: item.id, delta: 1 })}
                     className="w-8 h-8 rounded-full border border-zinc-700 hover:bg-zinc-800 transition"
                   >
                     +
                   </button>
 
                   <button
-                    onClick={() => removeItem(item.id)}
+                    onClick={() => removeItemMutation.mutate(item.id)}
                     className="ml-4 text-red-500 hover:text-red-400 transition"
                   >
                     Remove
@@ -113,7 +183,7 @@ export default function CartPage() {
         <div className="mt-8 flex justify-end">
 
           <button
-            onClick={handleCheckout}
+            onClick={() => checkoutMutation.mutate()}
             className="bg-white text-black px-8 py-3 rounded-full font-medium hover:scale-105 transition"
           >
             Proceed To Checkout
@@ -125,39 +195,4 @@ export default function CartPage() {
 
     </div>
   );
-}
-
-async function updateQty(id: number, delta: number) {
-  await fetch("/api/cart/update", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ id, delta }),
-  });
-
-  mutate("/api/cart");
-}
-
-async function removeItem(id: number) {
-  await fetch("/api/cart/remove", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ id }),
-  });
-
-  mutate("/api/cart");
-}
-
-async function handleCheckout() {
-  const res = await fetch("/api/order/create", {
-    method: "POST",
-    credentials: "include",
-  });
-
-  const data = await res.json();
-
-  if (data.orderId) {
-    window.location.href = `/checkout?orderId=${data.orderId}`;
-  }
 }

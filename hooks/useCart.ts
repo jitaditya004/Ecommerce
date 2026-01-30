@@ -1,5 +1,6 @@
-import useSWR from "swr";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
+import { apifetch } from "@/lib/apiFetch";
 
 type Product = {
   name: string;
@@ -17,27 +18,38 @@ type CartResponse = {
   items: CartItem[];
 };
 
-const fetcher = async (url: string): Promise<CartResponse> => {
-  const res = await fetch(url, { credentials: "include" });
+const fetchCart = async (): Promise<CartResponse> => {
+  const res = await apifetch<CartResponse>("/cart");
 
   if (!res.ok) {
-    throw new Error("Failed to fetch cart");
+    throw new Error(res.message);
   }
 
-  return res.json();
+  return res.data;
 };
 
 export function useCart() {
   const { user } = useAuth();
 
-  const { data, error, isLoading, mutate } = useSWR<CartResponse>(
-    user ? "/api/cart" : null,
-    fetcher
-  );
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["cart"],
+    queryFn: fetchCart,
+    enabled: Boolean(user),
+    staleTime: 30_000,
+  });
 
   const items = data?.items ?? [];
 
-  const count = items.reduce((sum, item) => sum + item.quantity, 0);
+  const count = items.reduce(
+    (sum, item) => sum + item.quantity,
+    0
+  );
 
   const totalPrice = items.reduce(
     (sum, item) => sum + item.products.price * item.quantity,
@@ -49,8 +61,8 @@ export function useCart() {
     count,
     totalPrice,
     isLoading,
-    isError: !!error,
+    isError,
     error,
-    mutate,
+    refetch,
   };
 }

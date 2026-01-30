@@ -1,12 +1,15 @@
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 
-
-type JwtPayloadType = {
-  userId: number;
+type AccessTokenPayload = {
+  user_id: string;
+  role: "USER" | "ADMIN";
+  email: string;
+  name: string;
 };
 
-export async function getUserIdFromRequest() {
+export async function getUserIdFromRequest(): Promise<bigint | null> {
+
   const cookieStore = await cookies();
   const token = cookieStore.get("access")?.value;
 
@@ -16,20 +19,24 @@ export async function getUserIdFromRequest() {
     const decoded = jwt.verify(
       token,
       process.env.ACCESS_TOKEN_SECRET!
-    );
+    ) as AccessTokenPayload;
 
+    if (!decoded.user_id) {
+      return null;
+    }
+
+    return BigInt(decoded.user_id);
+
+  } catch (error) {
+
+   
     if (
-      typeof decoded !== "object" ||
-      decoded === null ||
-      !("userId" in decoded)
+      error instanceof jwt.TokenExpiredError
     ) {
       return null;
     }
 
-    return Number((decoded as JwtPayloadType).userId);
-
-  } catch (error) {
-    console.error("Error verifying token:", error);
+    console.error("JWT verify failed:", error);
     return null;
   }
 }

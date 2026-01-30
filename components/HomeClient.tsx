@@ -2,14 +2,14 @@
 
 export default function HomeClient() {
   return (
-    <main className="relative min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black text-white overflow-hidden">
+    <main className="relative min-h-screen bg-linear-to-br from-zinc-950 via-zinc-900 to-black text-white overflow-hidden">
 
       <div className="absolute -top-32 -left-32 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl animate-pulse" />
       <div className="absolute top-40 -right-32 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl animate-pulse" />
 
       <section className="relative px-4 sm:px-10 pt-28 pb-20 text-center">
 
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent animate-fade-up">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight bg-linear-to-r from-white to-zinc-400 bg-clip-text text-transparent animate-fade-up">
           Discover Products You’ll Love
         </h1>
 

@@ -21,12 +21,13 @@ export async function GET() {
     },
   });
 
-  return NextResponse.json(
-    list.map(i => ({
+  return NextResponse.json({
+    items: list.map(i => ({
       id: Number(i.products?.product_id),
       name: i.products?.name,
       price: Number(i.products?.price),
       image_url: i.products?.image_url,
     }))
-  );
+  });
+
 }

@@ -5,6 +5,10 @@ import { prisma } from "@/lib/prisma";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 
+type AccessPayload = {
+  user_id: string;
+};  
+
 export async function POST(req: Request) {
   const { productId, quantity } = await req.json();
 
@@ -15,7 +19,7 @@ export async function POST(req: Request) {
     );
   }
 
-  if (!quantity || quantity <= 0) {
+  if (!Number.isInteger(quantity) || quantity <= 0) {
     return NextResponse.json(
       { message: "Invalid quantity" },
       { status: 400 }
@@ -30,11 +34,31 @@ export async function POST(req: Request) {
       { status: 401 }
     );
   }
+console.log("Token:", token);
 
-  const payload = jwt.verify(
-    token,
-    process.env.ACCESS_TOKEN_SECRET!
-  ) as { userId: number };
+  let payload: AccessPayload;
+
+  try {
+    payload = jwt.verify(
+      token,
+      process.env.ACCESS_TOKEN_SECRET!
+    ) as AccessPayload;
+  } catch {
+    return NextResponse.json(
+      { message: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
+
+  const userId = BigInt(payload.user_id);
+
+  if(!userId){
+    return NextResponse.json(
+      { message: "Unauthorized" },
+      { status: 401 }
+    );
+  }
 
 
   try {
@@ -42,13 +66,13 @@ export async function POST(req: Request) {
 
      
       let cart = await tx.carts.findFirst({
-        where: { user_id: payload.userId },
+        where: { user_id: userId },
       });
 
       if (!cart) {
         cart = await tx.carts.create({
           data: {
-            user_id: payload.userId,
+            user_id: userId,
           },
         });
       }

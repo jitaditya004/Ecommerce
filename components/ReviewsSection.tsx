@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { apifetch } from "@/lib/apiFetch";
+import {useQuery,useMutation,useQueryClient}from"@tanstack/react-query";
 
-type Review = {
+interface Review {
   id: number;
   rating: number;
   content: string;
@@ -10,41 +12,65 @@ type Review = {
   created_at: string;
 };
 
-export default function ReviewsSection({ productId }: { productId: number }) {
-  const [reviews, setReviews] = useState<Review[]>([]);
+type ReviewsResponse = {
+  reviews: Review[];
+}
+
+type AddReviewResponse = {
+  success: true;
+}
+
+interface Props {
+  productId:number;
+}
+
+const fetchReviews = async (productId:number):Promise<Review[]> => {
+  const res = await apifetch<ReviewsResponse>(`/reviews/${productId}`);
+
+  if (!res.ok) {
+    throw new Error(res.message);
+  }
+  return res.data.reviews ?? [];
+};
+
+const addReview = async (productId:number, rating:number, content:string):Promise<void> => {
+  const res = await apifetch<AddReviewResponse>("/reviews/add", {
+    method: "POST",
+    credentials: "include",
+    body: JSON.stringify({ productId, rating, content }),
+  });
+  if (!res.ok) {
+    throw new Error(res.message);
+  }
+};
+
+
+export default function ReviewsSection({ productId }: Props) {
+
   const [rating, setRating] = useState(5);
   const [content, setContent] = useState("");
-  const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
 
-  async function fetchReviews() {
-    const res = await fetch(`/api/reviews/${productId}`);
-    const data = await res.json();
-    setReviews(data);
+  const { data: reviews, isLoading, isError } = useQuery({
+    queryKey: ["reviews", productId],
+    queryFn: () => fetchReviews(productId),
+  });
+
+  const {mutate,isPending}=useMutation({
+    mutationFn:()=>addReview(productId,rating,content),
+    onSuccess:()=>{
+      setContent("");
+       queryClient.invalidateQueries({queryKey:["reviews",productId]});
+    }
+  });
+
+
+  if (isLoading) {
+    return <p className="text-zinc-400">Loading reviews...</p>;
   }
 
-  useEffect(() => {
-    fetchReviews();
-  }, [productId]);
-
-  async function submitReview() {
-    if (!content) return;
-
-    setLoading(true);
-
-    await fetch("/api/reviews/add", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({
-        productId,
-        rating,
-        content,
-      }),
-    });
-
-    setContent("");
-    await fetchReviews();
-    setLoading(false);
+  if (isError || !reviews) {
+    return <p className="text-red-400">Failed to load reviews</p>;
   }
 
   return (
@@ -59,6 +85,7 @@ export default function ReviewsSection({ productId }: { productId: number }) {
         <div className="flex flex-col sm:flex-row gap-3 mb-3">
 
           <select
+            title="Rating"
             value={rating}
             onChange={(e) => setRating(Number(e.target.value))}
             className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-white transition"
@@ -71,11 +98,12 @@ export default function ReviewsSection({ productId }: { productId: number }) {
           </select>
 
           <button
-            onClick={submitReview}
-            disabled={loading}
+            type="button"
+            onClick={() => mutate()}
+            disabled={isPending || content.trim() === "" || !content}
             className="bg-white text-black px-4 py-2 rounded-lg font-medium hover:scale-105 transition disabled:opacity-60"
           >
-            {loading ? "Posting..." : "Submit Review"}
+            {isPending ? "Posting..." : "Submit Review"}
           </button>
 
         </div>

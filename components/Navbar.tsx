@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCart } from "@/hooks/useCart";
 import { useState } from "react";
-import { useEffect } from "react";
 
 const NAV_ITEMS = [
   { label: "Home", href: "/" },

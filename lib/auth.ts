@@ -1,24 +1,59 @@
-import jwt from "jsonwebtoken";
+import jwt, { SignOptions } from "jsonwebtoken";
+
+type Role = "USER" | "ADMIN";
+
+const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET!;
+const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET!;
+
+type AccessTokenPayload = {
+  user_id: string;
+  role: Role;
+  name: string;
+  email: string;
+};
+
+type RefreshTokenPayload = {
+  user_id: string;
+};
 
 export function createAccessToken(user: {
   user_id: bigint;
-  role: string;
+  role: Role;
   name: string;
   email: string;
-}) {
-  return jwt.sign(
-    { userId: user.user_id.toString(), role: user.role, name: user.name, email: user.email },
-    process.env.ACCESS_TOKEN_SECRET!,
-    { expiresIn: "15m" }
-  );
+}): string {
+
+  if (!ACCESS_SECRET || !REFRESH_SECRET) {
+    throw new Error("JWT secrets not configured");
+  }
+
+  const payload: AccessTokenPayload = {
+    user_id: user.user_id.toString(),
+    role: user.role,
+    name: user.name,
+    email: user.email,
+  };
+
+  const options: SignOptions = {
+    algorithm: "HS256",
+    expiresIn: process.env.ACCESS_TOKEN_EXPIRY as SignOptions["expiresIn"] ?? "15m",
+  };
+
+  return jwt.sign(payload, ACCESS_SECRET, options);
 }
 
 export function createRefreshToken(user: {
   user_id: bigint;
-}) {
-  return jwt.sign(
-    { userId: user.user_id.toString(), },
-    process.env.REFRESH_TOKEN_SECRET!,
-    { expiresIn: "7d" }
-  );
+}): string {
+
+  const payload: RefreshTokenPayload = {
+    user_id: user.user_id.toString(),
+  };
+
+  const options: SignOptions = {
+    algorithm: "HS256",
+    expiresIn: process.env.REFRESH_TOKEN_EXPIRY as SignOptions["expiresIn"] ?? "7d",
+  };
+
+  return jwt.sign(payload, REFRESH_SECRET, options);
 }

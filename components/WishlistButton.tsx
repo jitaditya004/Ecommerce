@@ -1,40 +1,72 @@
 "use client";
 
 import { useWishlist } from "@/hooks/useWishlist";
+import { apifetch } from "@/lib/apiFetch";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+interface WishlistItem {
+  id: number;
+  name?: string;
+  price?: number;
+  image_url?: string | null;
+}
+
+
+type ToggleWishlistResponse = {
+  success: true;
+}
 
 export default function WishlistButton({
   productId,
 }: {
   productId: number;
 }) {
-  const { wishlist, mutate } = useWishlist();
+  const queryClient = useQueryClient();
+  const { wishlist } = useWishlist();
 
   const isWishlisted = wishlist.some(
     (item) => item.id === productId
   );
 
-  const toggleWishlist = async () => {
-    mutate(
-      (prev) =>
+  const { mutate,isPending } = useMutation({
+    mutationFn: async () => {
+      const res = await apifetch<ToggleWishlistResponse>("/wishlist/toggle", {
+        method: "POST",
+        body: JSON.stringify({ productId }),
+      });
+      if (!res.ok) {
+        throw new Error(res.message);
+      }
+    },
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ["wishlist"] });
+
+      const previous= queryClient.getQueryData<WishlistItem[]>(["wishlist"]);
+
+      queryClient.setQueryData<WishlistItem[]>(["wishlist"], (old=[]) => 
         isWishlisted
-          ? prev?.filter((p) => p.id !== productId)
-          : [...(prev || []), { id: productId } as any],
-      false
-    );
+          ? old.filter((item) => item.id !== productId)
+          : [...old, { id: productId } as WishlistItem]
+      );
 
-    await fetch("/api/wishlist/toggle", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ productId }),
-    });
+      return { previous };
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData<WishlistItem[]>(["wishlist"], context.previous);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["wishlist"] });
+    },
+  });
 
-    mutate();
-  };
 
   return (
     <button
-      onClick={toggleWishlist}
+      type="button"
+      disabled={isPending}
+      onClick={() => mutate()}
       aria-label="Toggle Wishlist"
       className={`
         w-9 h-9 flex items-center justify-center rounded-full

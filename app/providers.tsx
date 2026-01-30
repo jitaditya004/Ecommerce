@@ -12,6 +12,8 @@ export default function Providers({
 }: {
   children: React.ReactNode;
 }) {
+
+
   const [showSearch, setShowSearch] = useState(false);
   const [client] = useState(
     () =>

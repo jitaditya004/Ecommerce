@@ -6,111 +6,133 @@ import {
   useEffect,
   useState,
 } from "react";
+import { apifetch } from "@/lib/apiFetch";
+
+type Role = "USER" | "ADMIN";
 
 type User = {
   id: string;
   email: string;
-  role: string;
   name: string;
+  role: Role;
 };
 
 type AuthContextType = {
   user: User | null;
-  accessToken: string | null;
+  loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  loading: boolean;
 };
 
-const AuthContext = createContext<AuthContextType | null>(null);
+type LoginResponse = {
+  user: User;
+};
+
+type LogoutResponse = {
+  success: true;
+};
+
+const AuthContext = createContext<AuthContextType | undefined>(
+  undefined
+);
 
 export function AuthProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
+
   const [user, setUser] = useState<User | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  
-useEffect(() => {
-  let cancelled = false;
 
-  const refresh = async () => {
-    try {
-      const res = await fetch("/api/auth/refresh", {
-        method: "POST",
-        credentials: "include",
-      });
+  useEffect(() => {
 
-      if (!res.ok) throw new Error();
+    const loadSession = async () => {
+      try {
+        const res = await apifetch<{user : User}>("/auth/refresh",{
+          method: "POST",
+        });
 
-      const data = await res.json();
+        console.log("AuthProvider - refresh response:", res);
 
-      if (!cancelled) {
-        setAccessToken(data.accessToken);
-        setUser(data.user);
-      }
-    } catch {
-      if (!cancelled) {
-        setAccessToken(null);
-        setUser(null);
-      }
-    } finally {
-      if (!cancelled) {
+        if(res.ok){
+          setUser(res.data.user);
+        }
+
+      } catch (err) {
+        console.error("Failed to refresh session:", err);
+      } finally{
         setLoading(false);
+        console.log("AuthProvider - user:", user, "loading:", loading);
       }
-    }
-  };
+    };
 
-  refresh();
+    loadSession();
 
-  return () => {
-    cancelled = true;
-  };
-}, []);
+  }, []);
 
 
   const login = async (email: string, password: string) => {
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+
+    const res = await apifetch<LoginResponse>(
+      "/auth/login",
+      {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+      }
+    );
+    console.log("AuthProvider - login response:", res);
 
     if (!res.ok) {
-      throw new Error("Invalid credentials");
+      throw new Error(res.message);
     }
 
-    const data = await res.json();
-    setAccessToken(data.accessToken);
-    setUser(data.user);
-    return data.user;
+    setUser(res.data.user);
   };
 
+ 
   const logout = async () => {
-    await fetch("/api/auth/logout", {
-      method: "POST",
-      credentials: "include",
-    });
 
-    setAccessToken(null);
+    const res = await apifetch<LogoutResponse>(
+      "/auth/logout",
+      {
+        method: "POST",
+      }
+    );
+    console.log("AuthProvider - logout response:", res);
+
+    if (!res.ok) {
+      throw new Error(res.message);
+    }
+
     setUser(null);
   };
 
+  console.log("AuthProvider - rendering with user:", user, "loading:", loading);  
+
   return (
     <AuthContext.Provider
-      value={{ user, accessToken, login, logout, loading }}
+      value={{
+        user,
+        loading,
+        login,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>
   );
 }
 
+
 export const useAuth = () => {
+
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
+
+  if (!ctx) {
+    throw new Error("useAuth must be used inside AuthProvider");
+  }
+
   return ctx;
 };

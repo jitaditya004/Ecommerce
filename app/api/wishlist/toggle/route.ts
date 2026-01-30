@@ -6,9 +6,15 @@ import { getUserIdFromRequest } from "@/lib/serverAuth";
 
 export async function POST(req: Request) {
 
-  const { productId } = await req.json();
+  const body = await req.json();
+  const productId = Number(body.productId);
+
+  if (!Number.isInteger(productId)) {
+    return NextResponse.json({ message: "Invalid product id" }, { status: 400 });
+  }
 
   const userId = await getUserIdFromRequest();
+  console.log("Toggling wishlist for user:", userId, "product:", productId);
 
   if (!userId || !productId) {
     return NextResponse.json({}, { status: 401 });

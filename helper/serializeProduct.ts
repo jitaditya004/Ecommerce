@@ -1,4 +1,6 @@
-export function serializeProduct(product: any) {
+import {products} from "@prisma/client";
+
+export function serializeProduct(product: products | null) {
   if (!product) return null;
 
   return {
