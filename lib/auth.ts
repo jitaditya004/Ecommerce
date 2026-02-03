@@ -23,8 +23,8 @@ export function createAccessToken(user: {
   email: string;
 }): string {
 
-  if (!ACCESS_SECRET || !REFRESH_SECRET) {
-    throw new Error("JWT secrets not configured");
+  if (!ACCESS_SECRET) {
+    throw new Error("JWT access secrets not configured");
   }
 
   const payload: AccessTokenPayload = {
@@ -36,7 +36,7 @@ export function createAccessToken(user: {
 
   const options: SignOptions = {
     algorithm: "HS256",
-    expiresIn: process.env.ACCESS_TOKEN_EXPIRY as SignOptions["expiresIn"] ?? "15m",
+    expiresIn: process.env.ACCESS_TOKEN_EXPIRY as SignOptions["expiresIn"] || "15m",
   };
 
   return jwt.sign(payload, ACCESS_SECRET, options);
@@ -52,7 +52,7 @@ export function createRefreshToken(user: {
 
   const options: SignOptions = {
     algorithm: "HS256",
-    expiresIn: process.env.REFRESH_TOKEN_EXPIRY as SignOptions["expiresIn"] ?? "7d",
+    expiresIn: process.env.REFRESH_TOKEN_EXPIRY as SignOptions["expiresIn"] || "7d",
   };
 
   return jwt.sign(payload, REFRESH_SECRET, options);

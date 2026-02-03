@@ -10,7 +10,7 @@ export default function AdminLayout({
 
       <AdminSidebar />
 
-      <main className="flex-1 overflow-y-auto p-4 sm:p-6 bg-gradient-to-br from-zinc-950 via-zinc-900 to-black">
+      <main className="flex-1 overflow-y-auto p-4 sm:p-6 bg-linear-to-br from-zinc-950 via-zinc-900 to-black">
         {children}
       </main>
 

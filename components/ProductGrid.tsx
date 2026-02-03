@@ -1,14 +1,17 @@
-import { Product } from "@/types/product";
+import { use } from "react";
 import ProductCard from "./ProductCard";
 
 type Props = {
-  products: Product[];
+  dataPromise: Promise<GetProductsResult>;
 };
 
-export default function ProductGrid({ products }: Props) {
+export default function ProductGridServer({ dataPromise }: Props) {
+
+  const data = use(dataPromise);
+
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-      {products.map((product) => (
+      {data.products.map((product) => (
         <ProductCard
           key={product.product_id}
           product={product}

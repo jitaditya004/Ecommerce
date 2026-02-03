@@ -115,6 +115,7 @@ export default function Navbar({ onToggleSearch }: NavbarProps) {
             <div className="relative hidden sm:block">
 
               <button
+                type="button"
                 onClick={() => setMenuOpen(v => !v)}
                 className="flex items-center gap-2 hover:text-white"
               >

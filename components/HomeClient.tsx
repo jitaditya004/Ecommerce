@@ -1,5 +1,8 @@
 "use client";
 
+import Link from "next/link";
+import Image from "next/image";
+
 export default function HomeClient() {
   return (
     <main className="relative min-h-screen bg-linear-to-br from-zinc-950 via-zinc-900 to-black text-white overflow-hidden">
@@ -19,15 +22,65 @@ export default function HomeClient() {
 
         <div className="mt-10 flex justify-center gap-4 flex-wrap animate-fade-up delay-200">
 
-          <button className="px-8 py-3 rounded-full bg-white text-black font-semibold transition-all duration-300 hover:scale-105 hover:shadow-xl active:scale-95">
+          <Link href="/collection" className="px-8 py-3 rounded-full bg-white text-black font-semibold transition-all duration-300 hover:scale-105 hover:shadow-xl active:scale-95">
             Shop Now
-          </button>
+          </Link>
 
-          <button className="px-8 py-3 rounded-full border border-zinc-700 text-white transition-all duration-300 hover:bg-zinc-800 hover:border-zinc-500 active:scale-95">
+          <Link href="/collection" className="px-8 py-3 rounded-full border border-zinc-700 text-white transition-all duration-300 hover:bg-zinc-800 hover:border-zinc-500 active:scale-95">
             Browse Collection
-          </button>
+          </Link>
 
         </div>
+
+        <div className="mt-20 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+{/* hardcoded products for now */}
+        {[
+          {
+            title: "Apple Watch",
+            price: "$129",
+            img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30",
+          },
+          {
+            title: "Smart Watch",
+            price: "$199",
+            img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30",
+          },
+          {
+            title: "Sneakers",
+            price: "$149",
+            img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff",
+          },
+        ].map((product) => (
+          <div
+            key={product.title}
+            className="group bg-zinc-900/80 rounded-2xl overflow-hidden border border-zinc-800 hover:scale-105 transition"
+          >
+            <div className="overflow-hidden">
+              <Image
+                src={product.img}
+                alt={product.title}
+                width={400}
+                height={300}
+                className="h-56 w-full object-cover group-hover:scale-110 transition duration-500"
+              />
+            </div>
+
+            <div className="p-5">
+              <h3 className="font-semibold text-lg">{product.title}</h3>
+              <p className="mt-1 text-zinc-400">{product.price}</p>
+
+              <Link
+                href="/collection"
+                className="inline-block mt-4 text-sm font-medium text-purple-400 hover:text-purple-300"
+              >
+                View Product →
+              </Link>
+            </div>
+          </div>
+        ))}
+
+      </div>
+
 
         <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-4xl mx-auto">
 

@@ -2,42 +2,66 @@ export const runtime = "nodejs";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import jwt from "jsonwebtoken";
-import { error } from "console";
+import { COOKIE_NAMES } from "./types/cookieNames";
+
+type JwtPayload = {
+  user_id: string;
+  role: "USER" | "ADMIN";
+  name: string;
+};
 
 export function middleware(req: NextRequest) {
 
-  const token = req.cookies.get("access")?.value;
+  const token = req.cookies.get(COOKIE_NAMES.access)?.value;
 
   console.log("Middleware - Access Token:", token);
 
   if (!token) {
-    return NextResponse.redirect(new URL("/", req.url));
+    return NextResponse.redirect(new URL("/", req.nextUrl.origin));
   }
 
   try {
     const payload = jwt.verify(
       token,
       process.env.ACCESS_TOKEN_SECRET!
-    ) as { role: string };
+    ) as JwtPayload;
 
-    console.log("Middleware - Token Payload:", payload);
+    const requestHeaders = new Headers(req.headers);
 
-    if (payload.role !== "ADMIN") {
-      return NextResponse.redirect(new URL("/", req.url));
+    requestHeaders.set("x-user-id", payload.user_id);
+    requestHeaders.set("x-user-role", payload.role);
+    requestHeaders.set("x-user-name", payload.name);
+
+        // Admin route protection
+    if (
+      req.nextUrl.pathname.startsWith("/admin") ||
+      req.nextUrl.pathname.startsWith("/api/admin")
+    ) {
+      if (payload.role !== "ADMIN") {
+        return NextResponse.redirect(new URL("/", req.nextUrl.origin));
+      }
     }
+
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
 
   } catch (error) {
     console.log("Middleware - Token verification failed", error);
-    return NextResponse.redirect(new URL("/", req.url));
+    return NextResponse.redirect(new URL("/", req.nextUrl.origin));
   }
 
 }
 
-//also add paths like user profile, orders, carts, etc. that require authentication
 export const config = {
   matcher: [
     "/admin/:path*",
     "/api/admin/:path*",
-
+    "/api/user/:path*",
+    "/profile/:path*",
+    "/orders/:path*",
+    "/cart/:path*"
   ],
 };

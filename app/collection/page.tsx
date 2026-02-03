@@ -1,8 +1,9 @@
 import ProductGrid from "@/components/ProductGrid";
-import Controls from "@/components/Controls";
+import ControlsServer from "@/components/ControlsServer";
 import { Suspense } from "react";
 import { apifetch } from "@/lib/apiFetch";
 import { Product } from "@/types/product";
+// import Link from "next/link";
 
 interface ProductsResponse {
   products: Product[];
@@ -42,26 +43,31 @@ async function getProducts(searchParams: Promise<CollectionSearchParams>): Promi
 
 
 export default async function CollectionPage({ searchParams }: { searchParams: Promise<CollectionSearchParams> }) {
-  const { products, total,error } = await getProducts(searchParams);
+  // const { products, total,error } = await getProducts(searchParams);
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-black text-white">
-        <div className="text-center space-y-4">
-          <h1 className="text-3xl font-bold">Something went wrong</h1>
-          <p className="text-zinc-400">
-            Failed to load products. Please try again.
-          </p>
-          <a
-            href="/collection"
-            className="inline-block bg-white text-black px-6 py-2 rounded-full font-medium hover:scale-105 transition"
-          >
-            Retry
-          </a>
-        </div>
-      </div>
-    );
-  }
+
+  // if (error) {
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center bg-black text-white">
+  //       <div className="text-center space-y-4">
+  //         <h1 className="text-3xl font-bold">Something went wrong</h1>
+  //         <p className="text-zinc-400">
+  //           Failed to load products. Please try again.
+  //         </p>
+  //         <Link
+  //           href="/collection"
+  //           className="inline-block bg-white text-black px-6 py-2 rounded-full font-medium hover:scale-105 transition"
+  //         >
+  //           Retry
+  //         </Link>
+  //       </div>
+  //     </div>
+  //   );
+  // }
+
+  const params= await searchParams;
+
+  const productsPromise=getProducts(Promise.resolve(params));
 
   return (
     <div className="min-h-screen bg-linear-to-br from-zinc-950 via-zinc-900 to-black px-4 sm:px-10 py-12 text-white">
@@ -74,7 +80,10 @@ export default async function CollectionPage({ searchParams }: { searchParams: P
             Our Collection
           </h1>
 
-          <Controls total={total} />
+          <Suspense fallback={<ControlsSkeleton />}>
+            <ControlsServer dataPromise={productsPromise} />
+          </Suspense>
+
 
         </div>
 
@@ -90,11 +99,22 @@ export default async function CollectionPage({ searchParams }: { searchParams: P
             </div>
           }
         >
-          <ProductGrid products={products} />
+          <ProductGrid dataPromise={productsPromise} />
         </Suspense>
 
       </div>
 
+    </div>
+  );
+}
+
+
+
+function ControlsSkeleton() {
+  return (
+    <div className="flex gap-4 animate-pulse">
+      <div className="h-10 w-40 bg-zinc-800 rounded-lg" />
+      <div className="h-10 w-32 bg-zinc-800 rounded-lg" />
     </div>
   );
 }

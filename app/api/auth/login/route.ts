@@ -6,6 +6,7 @@ import {
   createRefreshToken,
 } from "@/lib/auth";
 import { Role } from "@/types/auth";
+import { COOKIE_NAMES } from "@/types/cookieNames";
 
 function isRole(value: unknown): value is Role {
   return value === "USER" || value === "ADMIN";
@@ -71,7 +72,7 @@ export async function POST(req: Request) {
 
     console.log("Response:", res, "Refresh Token:", refreshToken, "Access Token:", accessToken);
 
-    res.cookies.set("access", accessToken, {
+    res.cookies.set(COOKIE_NAMES.access, accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
@@ -80,7 +81,7 @@ export async function POST(req: Request) {
       priority: "high",
     });
 
-    res.cookies.set("refresh", refreshToken, {
+    res.cookies.set(COOKIE_NAMES.refresh, refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",

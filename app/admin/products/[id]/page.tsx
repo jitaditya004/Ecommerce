@@ -73,7 +73,7 @@ const handleUpdate = async (e: React.FormEvent) => {
 
   } catch (error) {
     console.error("Update failed:", error);
-    alert("Update failed. Check console.");
+    alert("Update failed.");
   } finally {
     setLoading(false);
   }

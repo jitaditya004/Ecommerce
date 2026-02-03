@@ -19,6 +19,8 @@ export async function POST() {
     const cookieStore = await cookies();
     const token = cookieStore.get("refresh")?.value;
 
+    console.log("auth refresh, refresh token: ",token);
+
     if (!token) {
       return NextResponse.json({}, { status: 401 });
     }
@@ -92,6 +94,10 @@ export async function POST() {
       path: "/",
       maxAge: Number(process.env.ACCESS_TOKEN_EXPIRY ?? 900),
     });
+
+    console.log("Refresh exp:", payload.exp);
+  console.log("Now:", Math.floor(Date.now() / 1000));
+
 
     return res;
 

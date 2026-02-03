@@ -15,7 +15,7 @@ export default function Controls({ total }: { total: number }) {
   function update(key: string, value: string) {
     const p = new URLSearchParams(params.toString());
     p.set(key, value);
-    router.push(`?${p.toString()}`);
+    router.replace(`?${p.toString()}`);
   }
 
   return (
