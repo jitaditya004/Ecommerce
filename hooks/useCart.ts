@@ -6,6 +6,7 @@ type Product = {
   name: string;
   price: number;
   image_url: string | null;
+  stock: number;
 };
 
 type CartItem = {

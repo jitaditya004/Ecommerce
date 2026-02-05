@@ -142,6 +142,13 @@ export default function CartPage() {
 
                 <div className="flex items-center gap-3 mt-3">
 
+                  {item.quantity >= item.products.stock && (
+                    <p className="text-red-500 text-sm">
+                      Max stock reached
+                    </p>
+                  )}
+
+
                   <button
                     type="button"
                     onClick={() => updateQtyMutation.mutate({ id: item.id, delta: -1 })}
@@ -155,6 +162,8 @@ export default function CartPage() {
                   </span>
 
                   <button
+                    type="button"
+                    disabled={item.quantity>=item.products.stock}
                     onClick={() => updateQtyMutation.mutate({ id: item.id, delta: 1 })}
                     className="w-8 h-8 rounded-full border border-zinc-700 hover:bg-zinc-800 transition"
                   >

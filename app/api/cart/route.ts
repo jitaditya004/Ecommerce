@@ -24,7 +24,7 @@ export async function GET() {
   });
   // console.log(cart?.cart_items);
 
-
+  console.log(cart);
 
   if (!cart) return NextResponse.json([]);
 
@@ -44,6 +44,7 @@ export async function GET() {
       name: item.products?.name,
       price: Number(item.products?.price),
       image_url: item.products?.image_url,
+      stock: item.products?.stock
     },
   }));
 

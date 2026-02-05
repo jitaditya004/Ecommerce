@@ -15,65 +15,92 @@ if (!UserId) {
   return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 }
 
-  const item = await prisma.cart_items.findFirst({
-    where: {
-      id,
-      carts: {
-        user_id: BigInt(UserId)
+  try{
+      const items=await prisma.$transaction(async (tx)=>{
+        const cartItem = await tx.cart_items.findFirst({
+          where: {
+            id,
+            carts: {
+              user_id: BigInt(UserId)
+            }
+          },
+          include:{
+            products:true,
+          }
+        });
+
+        if (!cartItem || !cartItem.products) {
+          throw new Error("ITEM_NOT_FOUND");
+        }
+
+        const newQty = cartItem.quantity + delta;
+
+        if (newQty > cartItem.products.stock) {
+          throw new Error("OUT_OF_STOCK");
+        }
+
+
+        if (newQty <= 0) {
+          await tx.cart_items.delete({
+            where: { id },
+          });
+        } else {
+          await tx.cart_items.update({
+            where: { id },
+            data: {
+              quantity: newQty,
+            },
+          });
+        }
+
+        const updatedCart = await tx.cart_items.findMany({
+          where: {
+            carts: {
+              user_id: BigInt(UserId),
+            },
+          },
+          include: {
+            products: {
+              select: {
+                name: true,
+                price: true,
+                image_url: true,
+              },
+            },
+          },
+          orderBy: {
+            id: "asc",
+          },
+        });
+
+
+        return updatedCart.map(i => ({
+          id: Number(i.id),
+          quantity: i.quantity,
+          products: {
+            name: i.products?.name,
+            price: Number(i.products?.price),
+            image_url: i.products?.image_url
+          }
+        }));
+      });
+
+        return NextResponse.json(
+          { items }
+        );
+      }catch(err){
+         if (err instanceof Error && err.message === "OUT_OF_STOCK") {
+            return NextResponse.json(
+              { message: "Product is out of stock" },
+              { status: 400 }
+            );
+          }
+
+          return NextResponse.json(
+            { message: "Something went wrong" },
+            { status: 500 }
+          );
       }
-    },
-  });
 
-  if (!item) {
-    return NextResponse.json([], { status: 404 });
-  }
-
-  if (item.quantity + delta <= 0) {
-    await prisma.cart_items.delete({
-      where: { id },
-    });
-  } else {
-    await prisma.cart_items.update({
-      where: { id },
-      data: {
-        quantity: item.quantity + delta,
-      },
-    });
-  }
-
-  const updatedCart = await prisma.cart_items.findMany({
-    where: {
-      carts: {
-        user_id: BigInt(UserId),
-      },
-    },
-    include: {
-      products: {
-        select: {
-          name: true,
-          price: true,
-          image_url: true,
-        },
-      },
-    },
-    orderBy: {
-      id: "asc",
-    },
-  });
-
-
-  const items =  updatedCart.map(i => ({
-    id: Number(i.id),
-    quantity: i.quantity,
-    products: {
-      name: i.products?.name,
-      price: Number(i.products?.price),
-      image_url: i.products?.image_url
-    }
-  }));
-
-  return NextResponse.json(
-    { items }
-  );
 }
 
