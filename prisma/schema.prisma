@@ -100,21 +100,22 @@ model reviews {
 }
 
 model users {
-  user_id            BigInt          @id @default(autoincrement())
-  email              String          @unique @db.VarChar(255)
-  password_hash      String?
-  fullname           String?         @db.VarChar(100)
-  username           String?         @unique @db.VarChar(50)
-  google_id          String?         @db.VarChar(100)
-  role               String?         @default("USER")
-  is_email_verified  Boolean?        @default(false)
+  user_id            BigInt           @id @default(autoincrement())
+  email              String           @unique @db.VarChar(255)
+  password_hash      String
+  fullname           String?          @db.VarChar(100)
+  username           String          @unique @db.VarChar(50)
+  google_id          String?          @db.VarChar(100)
+  role               String?          @default("USER")
+  is_email_verified  Boolean?         @default(false)
   reset_token        String?
-  reset_token_expiry DateTime?       @db.Timestamp(6)
-  created_at         DateTime?       @default(now()) @db.Timestamp(6)
-  updated_at         DateTime?       @default(now()) @db.Timestamp(6)
+  reset_token_expiry DateTime?        @db.Timestamp(6)
+  created_at         DateTime        @default(now()) @db.Timestamp(6)
+  updated_at         DateTime?        @default(now()) @db.Timestamp(6)
   carts              carts[]
   notifications      notifications[]
   orders             orders[]
+  refresh_tokens     refresh_tokens[]
   reviews            reviews[]
   wishlist           wishlist[]
 }
@@ -127,4 +128,18 @@ model wishlist {
   users      users?    @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([user_id, product_id])
+}
+
+model refresh_tokens {
+  id         BigInt    @id @default(autoincrement())
+  user_id    BigInt?
+  token_hash String
+  expires_at DateTime  @db.Timestamp(6)
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  revoked    Boolean?  @default(false)
+  user_agent String?
+  ip_address String?
+  users      users?    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "idx_refresh_user")
 }

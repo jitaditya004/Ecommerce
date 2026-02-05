@@ -1,0 +1,12 @@
+CREATE TABLE refresh_tokens (
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  user_id BIGINT REFERENCES users(user_id) ON DELETE CASCADE,
+  token_hash TEXT NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  revoked BOOLEAN DEFAULT FALSE,
+  user_agent TEXT,
+  ip_address TEXT
+);
+
+CREATE INDEX idx_refresh_user ON refresh_tokens(user_id);

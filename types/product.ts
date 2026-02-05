@@ -8,3 +8,4 @@ export type Product = {
   image_url: string | null;
   avgRating: number;
 };
+

@@ -1,5 +1,6 @@
 import { use } from "react";
 import ProductCard from "./ProductCard";
+import { GetProductsResult } from "@/types/products";
 
 type Props = {
   dataPromise: Promise<GetProductsResult>;

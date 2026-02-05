@@ -36,7 +36,7 @@ export function createAccessToken(user: {
 
   const options: SignOptions = {
     algorithm: "HS256",
-    expiresIn: process.env.ACCESS_TOKEN_EXPIRY as SignOptions["expiresIn"] || "15m",
+    expiresIn: Number(process.env.ACCESS_TOKEN_EXPIRY as SignOptions["expiresIn"]) || "15m",
   };
 
   return jwt.sign(payload, ACCESS_SECRET, options);
@@ -52,8 +52,14 @@ export function createRefreshToken(user: {
 
   const options: SignOptions = {
     algorithm: "HS256",
-    expiresIn: process.env.REFRESH_TOKEN_EXPIRY as SignOptions["expiresIn"] || "7d",
+    expiresIn: Number(process.env.REFRESH_TOKEN_EXPIRY as SignOptions["expiresIn"]) || "7d",
   };
 
   return jwt.sign(payload, REFRESH_SECRET, options);
 }
+
+
+
+// expiresIn: "604800"   // ❌ interpreted as SECONDS? NO
+// expiresIn: 604800     // ✅ seconds
+// expiresIn: "7d"       // ✅ safest

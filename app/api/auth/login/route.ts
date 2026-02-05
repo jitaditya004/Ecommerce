@@ -20,6 +20,8 @@ export async function POST(req: Request) {
     const email = String(body.email);
     const password = String(body.password);
 
+    //find user with the email
+
     const user = await prisma.users.findUnique({
       where: { email },
       select: {
@@ -30,10 +32,10 @@ export async function POST(req: Request) {
         role: true,
       },
     });
-
+    //no user 
     if (!user || !isRole(user.role)) {
       return NextResponse.json(
-        { message: "Invalid credentials" },
+        { message: "Invalid credentials, User Not Found" },
         { status: 401 }
       );
     }
@@ -42,13 +44,14 @@ export async function POST(req: Request) {
       password,
       user.password_hash
     );
-
+    
     if (!valid) {
       return NextResponse.json(
-        { message: "Invalid credentials" },
+        { message: "Invalid credentials, Wrong Password" },
         { status: 401 }
       );
     }
+
 
     const accessToken = createAccessToken({
       user_id: user.user_id,
@@ -60,6 +63,21 @@ export async function POST(req: Request) {
     const refreshToken = createRefreshToken({
       user_id: user.user_id,
     });
+
+    const refreshTokenHash = await bcrypt.hash(refreshToken, 10);
+
+    await prisma.refresh_tokens.create({
+      data: {
+        user_id: user.user_id,
+        token_hash: refreshTokenHash,
+        expires_at: new Date(
+          Date.now() +
+          Number(process.env.REFRESH_TOKEN_EXPIRY || 7 * 24 * 60 * 60) * 1000
+        ),
+      },
+    });
+
+
 
     const res = NextResponse.json({
       user: {
@@ -77,7 +95,7 @@ export async function POST(req: Request) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      maxAge: Number(process.env.ACCESS_TOKEN_EXPIRY ?? 15 * 60),
+      maxAge: Number(process.env.ACCESS_TOKEN_EXPIRY || 15 * 60),
       priority: "high",
     });
 
@@ -86,7 +104,7 @@ export async function POST(req: Request) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      maxAge: Number(process.env.REFRESH_TOKEN_EXPIRY ?? 7 * 24 * 60 * 60),
+      maxAge: Number(process.env.REFRESH_TOKEN_EXPIRY || 7 * 24 * 60 * 60),
       priority: "high",
     });
 

@@ -38,7 +38,7 @@ export default function AddToCartButton({
 
       if (!res.ok) {
         setShowToast("error");
-        throw new Error(res.message); 
+        console.error(res.message);
       }
 
       await queryClient.invalidateQueries({ queryKey: ["cart"] });
