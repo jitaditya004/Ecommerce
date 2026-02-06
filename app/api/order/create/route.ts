@@ -4,6 +4,7 @@ export const runtime = "nodejs";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { getUserIdFromRequest } from "@/lib/serverAuth";
+import { InsufficientStockError } from "@/lib/errors/InsufficientStockError";
 
 export async function POST() {
 
@@ -20,18 +21,6 @@ export async function POST() {
 
     const order = await prisma.$transaction(async (tx) => {
 
-      const existingOrder = await tx.orders.findFirst({
-        where: {
-          user_id: BigInt(userId),
-          payment_status: "UNPAID",
-          status: "PENDING",
-        },
-      });
-
-      if (existingOrder) {
-        return existingOrder;
-      }
-
       const cart = await tx.carts.findFirst({
         where: { user_id: BigInt(userId) },
         include: {
@@ -41,12 +30,50 @@ export async function POST() {
         },
       });
 
-      console.log("CART:", cart);
-
 
       if (!cart || cart.cart_items.length === 0) {
         throw new Error("CART_EMPTY");
       }
+
+      const insufficientItems: {
+        productId: bigint;
+        available: number;
+        requested: number;
+      }[] = [];
+
+
+      for (const item of cart.cart_items) {
+        const product = await tx.products.findUnique({
+          where: { product_id: item.product_id! },
+        });
+
+
+        if (!product || product.stock < item.quantity) {
+          insufficientItems.push({
+            productId: item.product_id!,
+            available: product?.stock ?? 0,
+            requested: item.quantity,
+          });
+        }
+      }
+
+      if (insufficientItems.length > 0) {
+        throw new InsufficientStockError(insufficientItems);
+      }
+
+      const existingOrder = await tx.orders.findFirst({
+        where: {
+          user_id: BigInt(userId),
+          payment_status: "UNPAID",
+          status: "PENDING",
+        },
+      });
+
+
+      if (existingOrder) {
+        return existingOrder;
+      }
+
 
       const total = cart.cart_items.reduce(
         (sum, item) =>
@@ -72,7 +99,6 @@ export async function POST() {
 
       return newOrder;
     });
-    console.log("ORDER CREATED:", order.order_id);
 
 
     return NextResponse.json({
@@ -81,26 +107,35 @@ export async function POST() {
 
   } catch (err: unknown) {
 
-    if (err instanceof Error) {
+      if (err instanceof InsufficientStockError) {
+        return NextResponse.json(
+          {
+            code: err.code,
+            items: err.items.map(i => ({
+              productId: Number(i.productId),
+              available: i.available,
+              requested: i.requested,
+            })),
+          },
+          { status: 409 }
+        );
+      }
 
-    if (err.message === "CART_EMPTY") {
+
+      if (err instanceof Error && err.message === "CART_EMPTY") {
+        return NextResponse.json(
+          { message: "Cart empty" },
+          { status: 400 }
+        );
+      }
+
+      console.error("ORDER ERROR:", err);
+
       return NextResponse.json(
-        { message: "Cart empty" },
-        { status: 400 }
+        { message: "Order creation failed" },
+        { status: 500 }
       );
     }
 
-    console.error("ORDER ERROR:", err.message);
-
-  } else {
-
-    console.error("ORDER ERROR:", err);
-  }
-
-    return NextResponse.json(
-      { message: "Order creation failed" },
-      { status: 500 }
-    );
-  }
 }
 

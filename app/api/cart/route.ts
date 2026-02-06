@@ -24,7 +24,6 @@ export async function GET() {
   });
   // console.log(cart?.cart_items);
 
-  console.log(cart);
 
   if (!cart) return NextResponse.json([]);
 
@@ -41,6 +40,7 @@ export async function GET() {
     id: Number(item.id),
     quantity: item.quantity,
     products: {
+      product_id: Number(item.products?.product_id),
       name: item.products?.name,
       price: Number(item.products?.price),
       image_url: item.products?.image_url,

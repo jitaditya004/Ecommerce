@@ -5,12 +5,18 @@ import { useCart } from "@/hooks/useCart";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apifetch } from "@/lib/apiFetch";
 import { useRouter } from "next/navigation";
+import {useState} from "react";
+import { InsufficientStockErrorResponse } from "@/types/errors";
 
 export default function CartPage() {
   const { user, loading } = useAuth();
   const { items, isLoading, totalPrice } = useCart();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const [stockErrors, setStockErrors] = useState<
+    { productId: number; available: number; requested: number }[]
+  >([]);
+
 
   const updateQtyMutation = useMutation({
     mutationFn: async ({
@@ -36,6 +42,12 @@ export default function CartPage() {
         queryKey: ["cart"],
       });
     },
+
+    onError: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["cart"],
+      });
+    }
   });
 
   // ---------- Remove item ----------
@@ -60,15 +72,17 @@ export default function CartPage() {
   });
 
   
-  const checkoutMutation = useMutation({
+  const checkoutMutation = useMutation<{orderId: number},InsufficientStockErrorResponse>({
     mutationFn: async () => {
 
       const res = await apifetch<{ orderId: number }>("/order/create", {
         method: "POST",
       });
 
+      console.log(res);
+
       if (!res.ok) {
-        throw new Error(res.message);
+        throw res.data;
       }
 
       return res.data;
@@ -77,6 +91,18 @@ export default function CartPage() {
     onSuccess: (data) => {
       router.push(`/checkout?orderId=${data.orderId}`);
     },
+    onError: (error: unknown) => {
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        error.code === "INSUFFICIENT_STOCK"
+      ) {
+        const e = error as InsufficientStockErrorResponse;
+        setStockErrors(e.items);
+      }
+    }
+
   });
 
   if (loading) {
@@ -126,7 +152,12 @@ export default function CartPage() {
 
         <div className="space-y-5">
 
-          {items.map((item) => (
+          {items.map((item) => {
+            const error = stockErrors.find(
+              e => e.productId === item.products.product_id
+            );
+
+            return(
             <div
               key={item.id}
               className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-zinc-900 border border-zinc-800 rounded-2xl p-5 hover:scale-[1.01] transition"
@@ -139,6 +170,12 @@ export default function CartPage() {
                 <p className="text-zinc-400">
                   ₹ {item.products.price}
                 </p>
+
+                {error && (
+                  <p className="text-red-400 text-sm mt-1">
+                    Only {error.available} left. You selected {error.requested}.
+                  </p>
+                )}
 
                 <div className="flex items-center gap-3 mt-3">
 
@@ -185,13 +222,17 @@ export default function CartPage() {
               </p>
 
             </div>
-          ))}
+            );}
+          )}
+        
 
         </div>
 
         <div className="mt-8 flex justify-end">
 
           <button
+            type="button"
+            disabled={stockErrors.length>0}
             onClick={() => checkoutMutation.mutate()}
             className="bg-white text-black px-8 py-3 rounded-full font-medium hover:scale-105 transition"
           >

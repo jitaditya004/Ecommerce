@@ -88,7 +88,6 @@ export async function POST(req: Request) {
       },
     });
 
-    console.log("Response:", res, "Refresh Token:", refreshToken, "Access Token:", accessToken);
 
     res.cookies.set(COOKIE_NAMES.access, accessToken, {
       httpOnly: true,

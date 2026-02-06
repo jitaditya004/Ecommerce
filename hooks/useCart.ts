@@ -3,6 +3,7 @@ import { useAuth } from "@/context/AuthContext";
 import { apifetch } from "@/lib/apiFetch";
 
 type Product = {
+  product_id: number;
   name: string;
   price: number;
   image_url: string | null;

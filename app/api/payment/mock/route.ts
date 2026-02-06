@@ -42,6 +42,35 @@ export async function POST(req: Request) {
 
   const result = await prisma.$transaction(async (tx) => {
 
+    // Get order items
+    const orderItems = await tx.order_items.findMany({
+      where: {
+        order_id: BigInt(orderId),
+      },
+    });
+
+    // Decrement stock safely
+    for (const item of orderItems) {
+      const updated = await tx.products.updateMany({
+        where: {
+          product_id: item.product_id!,
+          stock: {
+            gte: item.quantity, // prevent negative stock
+          },
+        },
+        data: {
+          stock: {
+            decrement: item.quantity,
+          },
+        },
+      });
+
+      if (updated.count === 0) {
+        throw new Error("INSUFFICIENT_STOCK_DURING_PAYMENT");
+      }
+    }
+
+    // Mark order as paid
     const orderUpdate = await tx.orders.updateMany({
       where: {
         order_id: BigInt(orderId),
@@ -60,6 +89,7 @@ export async function POST(req: Request) {
       throw new Error("ORDER_UPDATE_FAILED");
     }
 
+    // Clear cart
     await tx.cart_items.deleteMany({
       where: {
         carts: {
@@ -70,6 +100,7 @@ export async function POST(req: Request) {
 
     return true;
   });
+
 
   if (result === false) {
     return NextResponse.json(

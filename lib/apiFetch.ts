@@ -3,13 +3,14 @@ type ApiSuccess<T> = {
   data: T;
 };
 
-type ApiFailure = {
+type ApiFailure<E=unknown> = {
   ok: false;
   status: number;
   message: string;
+  data?:E;
 };
 
-export type ApiResult<T> = ApiSuccess<T> | ApiFailure;
+export type ApiResult<T,E=unknown> = ApiSuccess<T> | ApiFailure<E>;
 
 function isApiError(error: unknown): error is { status: number; message: string } {
   return (
@@ -85,6 +86,7 @@ export async function apifetch<T>(
         "message" in data
           ? String((data as { message: unknown }).message)
           : "Request failed",
+        data,  
     };
 
   } catch(error: unknown) {

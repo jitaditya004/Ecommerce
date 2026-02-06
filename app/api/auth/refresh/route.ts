@@ -24,7 +24,6 @@ export async function POST() {
     const token = cookieStore.get(COOKIE_NAMES.refresh)?.value;
 
 
-    console.log("auth refresh, refresh token: ",token);
 
     //if refresh token exists or not
     if (!token) {
@@ -152,7 +151,7 @@ export async function POST() {
       refreshTokenToSend = newRefresh;
     }
 
-    console.log("Generated access token:", accessToken);
+
 
     const res = NextResponse.json({
       user: {
@@ -177,10 +176,6 @@ export async function POST() {
       path: "/",
       maxAge: Number(process.env.ACCESS_TOKEN_EXPIRY || 900),
     });
-
-    console.log("Refresh exp:", payload.exp);
-  console.log("Now:", Math.floor(Date.now() / 1000));
-
 
     return res;
 
