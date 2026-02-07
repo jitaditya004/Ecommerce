@@ -71,9 +71,19 @@ export async function POST() {
 
 
       if (existingOrder) {
-        return existingOrder;
-      }
+        const updatedOrder = await tx.orders.update({
+          where: { order_id: existingOrder.order_id },
+          data: {
+            order_total: cart.cart_items.reduce(
+              (sum, item) =>
+                sum + Number(item.products?.price || 0) * item.quantity,
+              0
+            ),
+          },
+        });
 
+        return updatedOrder;
+      }
 
       const total = cart.cart_items.reduce(
         (sum, item) =>

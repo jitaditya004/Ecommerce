@@ -33,17 +33,24 @@ export default function CartPage() {
       });
 
       if (!res.ok) {
-        throw new Error(res.message);
+        throw res;
       }
+
+      return res.data;
     },
 
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["cart"],
-      });
+    // onSuccess: () => {
+    //   queryClient.invalidateQueries({
+    //     queryKey: ["cart"],
+    //   });
+    // },
+
+    onMutate: ()=> {
+      setStockErrors([]);
     },
 
-    onError: () => {
+
+    onSettled: () => {
       queryClient.invalidateQueries({
         queryKey: ["cart"],
       });
@@ -234,7 +241,7 @@ export default function CartPage() {
             type="button"
             disabled={stockErrors.length>0}
             onClick={() => checkoutMutation.mutate()}
-            className="bg-white text-black px-8 py-3 rounded-full font-medium hover:scale-105 transition"
+            className="bg-white text-black px-8 py-3 rounded-full font-medium hover:scale-105 disabled:bg-gray-500 transition"
           >
             Proceed To Checkout
           </button>

@@ -2,6 +2,7 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function PaymentPage() {
   const params = useSearchParams();
@@ -9,6 +10,7 @@ export default function PaymentPage() {
 
   const orderId = params.get("orderId");
   const [paying, setPaying] = useState(false);
+  const queryClient=useQueryClient();
 
   const payNow = async (method: string) => {
     try {
@@ -24,6 +26,7 @@ export default function PaymentPage() {
       const data = await res.json();
 
       if (data.success) {
+        queryClient.invalidateQueries({queryKey: ["cart"]});
         router.push(`/success?orderId=${orderId}`);
       } else {
         alert("Payment failed. Try again.");

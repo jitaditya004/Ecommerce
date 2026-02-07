@@ -35,23 +35,31 @@ if (!UserId) {
 
         const newQty = cartItem.quantity + delta;
 
-        if (newQty > cartItem.products.stock) {
-          throw new Error("OUT_OF_STOCK");
-        }
+        const safeQty = Math.min(newQty, cartItem.products.stock);
 
-
-        if (newQty <= 0) {
-          await tx.cart_items.delete({
-            where: { id },
-          });
+        if (safeQty <= 0) {
+          await tx.cart_items.delete({ where: { id } });
         } else {
           await tx.cart_items.update({
             where: { id },
-            data: {
-              quantity: newQty,
-            },
+            data: { quantity: safeQty },
           });
         }
+
+
+
+        // if (newQty <= 0) {
+        //   await tx.cart_items.delete({
+        //     where: { id },
+        //   });
+        // } else {
+        //   await tx.cart_items.update({
+        //     where: { id },
+        //     data: {
+        //       quantity: newQty,
+        //     },
+        //   });
+        // }
 
         const updatedCart = await tx.cart_items.findMany({
           where: {

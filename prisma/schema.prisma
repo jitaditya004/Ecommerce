@@ -51,7 +51,7 @@ model order_items {
 
 model orders {
   order_id       BigInt        @id @default(autoincrement())
-  user_id        BigInt?
+  user_id        BigInt
   status         String?       @default("PENDING") @db.VarChar(20)
   payment_status String?       @default("UNPAID") @db.VarChar(20)
   payment_method String?       @db.VarChar(50)
@@ -59,6 +59,7 @@ model orders {
   currency       String?       @default("INR") @db.Char(3)
   reference_id   String?       @db.VarChar(100)
   created_at     DateTime?     @default(now()) @db.Timestamp(6)
+  updated_at     DateTime?     @updatedAt
   order_items    order_items[]
   users          users?        @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
 
