@@ -1,8 +1,8 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import useSWR from "swr";
-
+import { useQuery } from "@tanstack/react-query";
+import { apifetch } from "@/lib/apiFetch";
 interface OrderItem {
   id: number;
   quantity: number;
@@ -21,17 +21,31 @@ interface OrderDetails {
   items: OrderItem[];
 }
 
-const fetcher = (url: string) =>
-  fetch(url, { credentials: "include" }).then((r) => r.json());
+const fetchOrder = async (id: string): Promise<OrderDetails> => {
+  const res = await apifetch<OrderDetails>(`/order/${id}`, {
+  });
+
+  if (!res.ok) {
+    throw new Error(res.message);
+  }
+
+  return res.data;
+};
+
 
 export default function OrderDetailsPage() {
   const params = useParams();
   const id = params?.id as string | undefined;
 
-  const { data, isLoading } = useSWR<OrderDetails>(
-    id ? `/api/order/${id}` : null,
-    fetcher
-  );
+    const {
+    data,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["order", id],
+    queryFn: () => fetchOrder(id!),
+    enabled: !!id,
+  });
 
   if (isLoading) {
     return (
@@ -48,6 +62,14 @@ export default function OrderDetailsPage() {
       </div>
     );
   }
+
+    if (isError || !data) {
+      return (
+        <div className="min-h-screen flex items-center justify-center text-zinc-400">
+          Order not found
+        </div>
+      );
+    }
 
   return (
     <div className="min-h-screen bg-linear-to-br from-zinc-950 via-zinc-900 to-black px-4 sm:px-8 py-12 text-white">

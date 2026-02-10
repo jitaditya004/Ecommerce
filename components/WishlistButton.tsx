@@ -3,6 +3,7 @@
 import { useWishlist } from "@/hooks/useWishlist";
 import { apifetch } from "@/lib/apiFetch";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/context/AuthContext";
 
 interface WishlistItem {
   id: number;
@@ -23,6 +24,7 @@ export default function WishlistButton({
 }) {
   const queryClient = useQueryClient();
   const { wishlist } = useWishlist();
+  const {user} = useAuth();
 
   const isWishlisted = wishlist.some(
     (item) => item.id === productId
@@ -30,6 +32,7 @@ export default function WishlistButton({
 
   const { mutate,isPending } = useMutation({
     mutationFn: async () => {
+      if(!user) throw new Error("Not authenticated");
       const res = await apifetch<ToggleWishlistResponse>("/wishlist/toggle", {
         method: "POST",
         body: JSON.stringify({ productId }),
@@ -39,6 +42,7 @@ export default function WishlistButton({
       }
     },
     onMutate: async () => {
+      if(!user) return;
       await queryClient.cancelQueries({ queryKey: ["wishlist"] });
 
       const previous= queryClient.getQueryData<WishlistItem[]>(["wishlist"]);
@@ -65,7 +69,7 @@ export default function WishlistButton({
   return (
     <button
       type="button"
-      disabled={isPending}
+      disabled={!user || isPending}
       onClick={() => mutate()}
       aria-label="Toggle Wishlist"
       className={`

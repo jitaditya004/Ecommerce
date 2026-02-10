@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { apifetch } from "@/lib/apiFetch";
+import { useAuth } from "@/context/AuthContext";
 
 interface WishlistItem {
   id: number;
@@ -22,10 +23,12 @@ const fetchWishlist = async (): Promise<WishlistItem[]> => {
 };
 
 export function useWishlist() {
+  const {user}=useAuth();
 
   const {data , isLoading ,isError, error, refetch } = useQuery({
     queryKey: ["wishlist"],
     queryFn: fetchWishlist,
+    enabled: !!user,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 

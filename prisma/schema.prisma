@@ -144,3 +144,19 @@ model refresh_tokens {
 
   @@index([user_id], map: "idx_refresh_user")
 }
+
+
+model IssueReport {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  message   String
+  status    IssueStatus @default(OPEN)
+  createdAt DateTime @default(now())
+}
+
+enum IssueStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+}

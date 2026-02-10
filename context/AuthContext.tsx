@@ -7,6 +7,7 @@ import {
   useState,
 } from "react";
 import { apifetch } from "@/lib/apiFetch";
+import { useQueryClient } from "@tanstack/react-query";
 
 type Role = "USER" | "ADMIN";
 
@@ -41,6 +42,7 @@ export function AuthProvider({
 }: {
   children: React.ReactNode;
 }) {
+  const queryClient=useQueryClient();
 
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -54,7 +56,6 @@ export function AuthProvider({
           method: "POST",
         });
 
-        console.log("AuthProvider - refresh response:", res);
 
         if(res.ok){
           setUser(res.data.user);
@@ -64,7 +65,7 @@ export function AuthProvider({
         console.error("Failed to refresh session:", err);
       } finally{
         setLoading(false);
-        console.log("AuthProvider - user:", user, "loading:", loading);
+        
       }
     };
 
@@ -74,6 +75,7 @@ export function AuthProvider({
 
 
   const login = async (email: string, password: string) => {
+    queryClient.clear();
 
     const res = await apifetch<LoginResponse>(
       "/auth/login",
@@ -82,7 +84,6 @@ export function AuthProvider({
         body: JSON.stringify({ email, password }),
       }
     );
-    console.log("AuthProvider - login response:", res);
 
     if (!res.ok) {
       throw new Error(res.message);
@@ -100,13 +101,19 @@ export function AuthProvider({
         method: "POST",
       }
     );
-    console.log("AuthProvider - logout response:", res);
+    
 
     if (!res.ok) {
       throw new Error(res.message);
     }
 
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    queryClient.removeQueries();
+
     setUser(null);
+
+    window.location.href = "/";
   };
 
   console.log("AuthProvider - rendering with user:", user, "loading:", loading);  

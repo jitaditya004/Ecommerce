@@ -1,7 +1,8 @@
 "use client";
 
-import useSWR from "swr";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { apifetch } from "@/lib/apiFetch";
 
 interface Order {
   id: string;
@@ -16,12 +17,28 @@ interface OrdersResponse {
 }
 
 
-const fetcher = (url: string) =>
-  fetch(url, { credentials: "include" }).then((r) => r.json());
+const fetchOrders = async (): Promise<OrdersResponse> => {
+  const res = await apifetch<OrdersResponse>("/order", {
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch orders");
+  }
+
+  return res.data;
+};
+
 
 export default function OrdersPage() {
-  const { data:ordersdata, isLoading } = useSWR<OrdersResponse>("/api/order", fetcher);
-  const data = ordersdata?.orders;
+    const {
+      data,
+      isLoading,
+      isError,
+    } = useQuery({
+      queryKey: ["orders"],
+      queryFn: fetchOrders,
+    });
+  const orders = data?.orders;
 
   if (isLoading) {
     return (
@@ -31,7 +48,7 @@ export default function OrdersPage() {
     );
   }
 
-  if (!data || data.length === 0) {
+  if (isError || !orders || orders.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center text-zinc-400">
         No orders found
@@ -50,7 +67,7 @@ export default function OrdersPage() {
 
         <div className="space-y-5">
 
-          {data.map((order) => (
+          {orders.map((order) => (
             <Link
               key={order.id}
               href={`/orders/${order.id}`}

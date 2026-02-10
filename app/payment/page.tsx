@@ -3,6 +3,7 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { apifetch } from "@/lib/apiFetch";
 
 export default function PaymentPage() {
   const params = useSearchParams();
@@ -16,17 +17,20 @@ export default function PaymentPage() {
     try {
       setPaying(true);
 
-      const res = await fetch("/api/payment/mock", {
+      const res = await apifetch<{success : boolean}>("/payment/mock", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({ orderId, method }),
       });
 
-      const data = await res.json();
+      if (!res.ok) {
+        alert(res.message);
+        return;
+      }
 
-      if (data.success) {
+
+      if (res.data.success) {
         queryClient.invalidateQueries({queryKey: ["cart"]});
+        queryClient.invalidateQueries({ queryKey: ["orders"] });
         router.push(`/success?orderId=${orderId}`);
       } else {
         alert("Payment failed. Try again.");
