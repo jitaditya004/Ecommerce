@@ -1,0 +1,13 @@
+"use client";
+import { useQuery } from "@tanstack/react-query";
+import ProductGrid from "./ProductGrid";
+
+export default function FeaturedProducts() {
+  const { data } = useQuery({
+    queryKey: ["featured"],
+    queryFn: fetchFeatured,
+    suspense: true, // IMPORTANT
+  });
+
+  return <ProductGrid products={data} />;
+}

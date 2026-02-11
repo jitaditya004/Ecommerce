@@ -38,7 +38,7 @@ export default function AddToCartButton({
 
       if (!res.ok) {
         setShowToast("error");
-        console.error(res.message);
+        throw new Error(res.message);
       }
 
       await queryClient.invalidateQueries({ queryKey: ["cart"] });
@@ -58,7 +58,7 @@ export default function AddToCartButton({
   return (
     <div className="relative">
 
-      {showToast && (
+      {/* {showToast && (
         <div
           className={`
             absolute -top-10 left-1/2 -translate-x-1/2
@@ -89,7 +89,37 @@ export default function AddToCartButton({
         "
       >
         {loading ? "Adding..." : "Add to Cart"}
+      </button> */}
+
+      <button
+        type="button"
+        disabled={disabled || loading}
+        onClick={handleAdd}
+        className="
+          w-full mt-3
+          bg-white text-black
+          py-2.5 rounded-lg font-medium
+          transition-all
+          hover:scale-105 active:scale-95
+          disabled:opacity-50 disabled:cursor-not-allowed
+          flex items-center justify-center gap-2
+        "
+      >
+        {loading ? (
+          <>
+            <span className="h-4 w-4 rounded-full border-2 border-black border-t-transparent animate-spin" />
+            Adding…
+          </>
+        ) : showToast === "success" ? (
+          <>
+            <span>✓</span>
+            Added
+          </>
+        ) : (
+          "Add to Cart"
+        )}
       </button>
+
 
     </div>
   );

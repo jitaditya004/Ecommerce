@@ -2,6 +2,27 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { Suspense } from "react";
+
+const ProductsSkeleton = () => (
+  <div className="mt-20 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 max-w-6xl mx-auto animate-pulse">
+    {Array.from({ length: 3 }).map((_, i) => (
+      <div
+        key={i}
+        className="bg-zinc-900/80 rounded-2xl overflow-hidden border border-zinc-800"
+      >
+        <div className="h-56 w-full bg-zinc-800" />
+
+        <div className="p-5 space-y-3">
+          <div className="h-5 w-2/3 bg-zinc-800 rounded" />
+          <div className="h-4 w-1/3 bg-zinc-800 rounded" />
+          <div className="h-4 w-24 bg-zinc-800 rounded" />
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
 
 export default function HomeClient() {
   return (
@@ -32,6 +53,7 @@ export default function HomeClient() {
 
         </div>
 
+      <Suspense fallback={<ProductsSkeleton />} >
         <div className="mt-20 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
 {/* hardcoded products for now */}
         {[
@@ -80,6 +102,8 @@ export default function HomeClient() {
         ))}
 
       </div>
+
+      </Suspense>
 
 
         <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-4xl mx-auto">

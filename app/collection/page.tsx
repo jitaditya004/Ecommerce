@@ -43,27 +43,6 @@ async function getProducts(searchParams: Promise<CollectionSearchParams>): Promi
 
 
 export default async function CollectionPage({ searchParams }: { searchParams: Promise<CollectionSearchParams> }) {
-  // const { products, total,error } = await getProducts(searchParams);
-
-
-  // if (error) {
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center bg-black text-white">
-  //       <div className="text-center space-y-4">
-  //         <h1 className="text-3xl font-bold">Something went wrong</h1>
-  //         <p className="text-zinc-400">
-  //           Failed to load products. Please try again.
-  //         </p>
-  //         <Link
-  //           href="/collection"
-  //           className="inline-block bg-white text-black px-6 py-2 rounded-full font-medium hover:scale-105 transition"
-  //         >
-  //           Retry
-  //         </Link>
-  //       </div>
-  //     </div>
-  //   );
-  // }
 
   const params= await searchParams;
 

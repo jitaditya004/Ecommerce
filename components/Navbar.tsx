@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCart } from "@/hooks/useCart";
 import { useState } from "react";
+import NavbarSkeleton from "./NavbarSkeleton";
 
 const NAV_ITEMS = [
   { label: "Home", href: "/" },
@@ -27,7 +28,7 @@ export default function Navbar({ onToggleSearch }: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
 
-  if (loading) return null;
+  if (loading) return <NavbarSkeleton />;
 
   return (
     <nav className="sticky top-0 z-50 bg-zinc-950/80 backdrop-blur border-b border-zinc-800">

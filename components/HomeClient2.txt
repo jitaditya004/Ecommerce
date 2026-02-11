@@ -1,0 +1,18 @@
+"use client";
+
+import Hero from "./Hero";
+import FeaturedProducts from "./FeaturedProducts";
+import ProductsSkeleton from "./ProductsSkeleton";
+import { Suspense } from "react";
+
+export default function HomeClient() {
+  return (
+    <main className="min-h-screen bg-black text-white">
+      <Hero />
+
+      <Suspense fallback={<ProductsSkeleton />}>
+        <FeaturedProducts />
+      </Suspense>
+    </main>
+  );
+}
