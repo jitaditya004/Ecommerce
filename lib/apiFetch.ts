@@ -33,6 +33,9 @@ export async function apifetch<T>(
   retry = true
 ): Promise<ApiResult<T>> {
 
+  const isServer = typeof window === "undefined";
+
+
   try {
     const isFormData = options.body instanceof FormData;
 
@@ -54,6 +57,7 @@ export async function apifetch<T>(
     }
 
     if (
+      !isServer &&
       res.status === 401 &&
       retry &&
       !endpoint.includes("/auth/")

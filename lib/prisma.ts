@@ -1,13 +1,23 @@
 import { PrismaClient } from "@prisma/client";
 
-const globalForPrisma = globalThis as {
-  prisma?: PrismaClient;
-};
+declare global {
+  interface BigInt {
+    toJSON(): number;
+  }
 
-export const prisma =
-  globalForPrisma.prisma ??
+  var prisma: PrismaClient | undefined;
+}
+
+const prisma =
+  global.prisma ??
   new PrismaClient();
 
+BigInt.prototype.toJSON = function (): number {
+  return Number(this);
+};
+
 if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
+  global.prisma = prisma;
 }
+
+export { prisma };
