@@ -116,8 +116,6 @@ export function AuthProvider({
     window.location.href = "/";
   };
 
-  console.log("AuthProvider - rendering with user:", user, "loading:", loading);  
-
   return (
     <AuthContext.Provider
       value={{

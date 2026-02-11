@@ -1,7 +1,7 @@
 import ProductGrid from "@/components/ProductGrid";
 import ControlsServer from "@/components/ControlsServer";
 import { Suspense } from "react";
-import { apifetch } from "@/lib/apiFetch";
+import { publicFetch } from "@/lib/publicFetch";
 import { Product } from "@/types/product";
 // import Link from "next/link";
 
@@ -28,7 +28,7 @@ async function getProducts(searchParams: Promise<CollectionSearchParams>): Promi
   const limit = (await searchParams).limit ?? "12";
   const sort = (await searchParams).sort ?? "recent";
 
-  const res = await apifetch<ProductsResponse>(
+  const res = await publicFetch<ProductsResponse>(
     `/products?page=${page}&limit=${limit}&sort=${sort}`,
     { cache: "no-store" }
   );
