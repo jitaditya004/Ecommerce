@@ -29,15 +29,17 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "swr": "^2.3.8",
-    "tailwindcss": "^4.1.18"
+    "tailwindcss": "^4.1.18",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19",
+    "@types/node": "^20.19.33"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.10",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^20.19.33",
+    
     "@types/pg": "^8.16.0",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19",
+
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
     "typescript": "^5"
