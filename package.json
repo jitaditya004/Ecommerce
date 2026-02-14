@@ -32,9 +32,7 @@
     "tailwindcss": "^4.1.18",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19",
-    "@types/node": "^20.19.33"
-  },
-  "devDependencies": {
+    "@types/node": "^20.19.33",
     "@types/cookie-parser": "^1.4.10",
     "@types/jsonwebtoken": "^9.0.10",
     
@@ -43,5 +41,8 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
     "typescript": "^5"
+  },
+  "devDependencies": {
+
   }
 }
