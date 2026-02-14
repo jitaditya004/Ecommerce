@@ -49,6 +49,7 @@ export default function AddToCartButton({
     } catch (err) {
       console.error("Add to cart error:", err);
       setShowToast("error");
+      setTimeout(()=>setShowToast(null),1500);
     } 
     finally {
       setLoading(false);
@@ -115,6 +116,8 @@ export default function AddToCartButton({
             <span>✓</span>
             Added
           </>
+        ) : showToast === "error" ? (
+          "Login required"
         ) : (
           "Add to Cart"
         )}
