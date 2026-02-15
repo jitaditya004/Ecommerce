@@ -1,1 +1,7 @@
 npm install --save-dev @types/react @types/node
+
+fix prisma error in render deploy
+
+
+
+NODE_OPTIONS="--max-old-space-size=2048" npm run dev
