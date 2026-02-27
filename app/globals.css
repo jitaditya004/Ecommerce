@@ -26,21 +26,21 @@ body {
 }
 
 
-@keyframes reverseLoader {
+/* @keyframes reverseLoader {
   from {
     transform: translateX(0%);
   }
   to {
     transform: translateX(-100%);
   }
-}
+} */
 
 .animate-reverse-loader {
   width: 100%;
   animation: reverseLoader 1.2s linear infinite;
 }
 
-
+/* 
 @keyframes slideDown {
   from {
     transform: translateY(-20px);
@@ -50,9 +50,9 @@ body {
     transform: translateY(0);
     opacity: 1;
   }
-}
+} */
 
-.animate-slideDown {
+/* .animate-slideDown {
   animation: slideDown 0.2s ease-out;
 }
 @keyframes slideUp {
@@ -64,7 +64,7 @@ body {
     transform: translateY(0);
     opacity: 1;
   }
-}
+} */
 
 .animate-slideUp {
   animation: slideUp 0.2s ease-out;
