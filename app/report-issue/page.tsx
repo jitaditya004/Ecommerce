@@ -34,40 +34,67 @@ export default function ReportIssuePage() {
     const form = e.currentTarget;
 
     mutate({
-      name: form.user_name.value,
-      email: form.user_email.value,
-      message: form.message.value,
+      name: (form.elements.namedItem("user_name") as HTMLInputElement).value,
+      email: (form.elements.namedItem("user_email") as HTMLInputElement).value,
+      message: (form.elements.namedItem("message") as HTMLTextAreaElement).value,
     });
 
     form.reset();
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black text-white px-4">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-black via-zinc-950 to-zinc-900 px-4">
       <form
         onSubmit={submit}
-        className="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl w-full max-w-md space-y-4"
+        className="w-full max-w-lg bg-zinc-900/70 backdrop-blur-md border border-zinc-800 shadow-2xl rounded-3xl p-8 space-y-6 transition-all"
       >
-        <h1 className="text-2xl font-bold text-center">Report an Issue</h1>
+        <h1 className="text-3xl font-bold text-center tracking-tight">
+          Report an Issue
+        </h1>
 
         {success && (
-          <p className="text-green-400 text-center">
-            Issue submitted successfully
-          </p>
+          <div className="bg-green-500/10 border border-green-500/30 text-green-400 text-sm rounded-xl p-3 text-center">
+            Issue submitted successfully.
+          </div>
         )}
 
         {error && (
-          <p className="text-red-400 text-center">
+          <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-xl p-3 text-center">
             {(error as Error).message}
-          </p>
+          </div>
         )}
 
-        <input name="user_name" required placeholder="Your Name" />
-        <input name="user_email" required type="email" placeholder="Email" />
-        <textarea name="message" required placeholder="Describe issue" />
+        <div className="space-y-4">
+          <input
+            name="user_name"
+            required
+            placeholder="Your Name"
+            className="w-full px-4 py-3 rounded-xl bg-zinc-800 border border-zinc-700 focus:border-white focus:ring-2 focus:ring-white/20 outline-none transition"
+          />
 
-        <button disabled={isPending}>
-          {isPending ? "Submitting..." : "Submit"}
+          <input
+            name="user_email"
+            type="email"
+            required
+            placeholder="Email Address"
+            className="w-full px-4 py-3 rounded-xl bg-zinc-800 border border-zinc-700 focus:border-white focus:ring-2 focus:ring-white/20 outline-none transition"
+          />
+
+          <textarea
+            name="message"
+            required
+            rows={4}
+            placeholder="Describe the issue..."
+            className="w-full px-4 py-3 rounded-xl bg-zinc-800 border border-zinc-700 focus:border-white focus:ring-2 focus:ring-white/20 outline-none transition resize-none"
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={isPending}
+          className="w-full py-3 rounded-xl font-semibold bg-white text-black hover:scale-[1.02] active:scale-[0.98] transition disabled:bg-zinc-600 disabled:text-zinc-300"
+        >
+          {isPending ? "Submitting..." : "Submit Report"}
         </button>
       </form>
     </div>

@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function ContactPage() {
   return (
     <div className="min-h-screen bg-linear-to-br from-zinc-950 via-zinc-900 to-black px-4 sm:px-10 py-16 text-white">
@@ -40,12 +42,12 @@ export default function ContactPage() {
 
       </div>
       <div className="max-w-3xl mx-auto text-center mt-10">
-        <a
+        <Link
           href="/report-issue"
           className="inline-block bg-white text-black px-6 py-3 rounded-full font-medium hover:scale-105 transition"
         >
-          🚨 Report an Issue
-        </a>
+          🚨 Report an Issue or Feedback
+        </Link>
       </div>
 
 
