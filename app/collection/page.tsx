@@ -1,20 +1,21 @@
 import ProductGrid from "@/components/ProductGrid";
 import ControlsServer from "@/components/ControlsServer";
 import { Suspense } from "react";
-import { publicFetch } from "@/lib/publicFetch";
-import { Product } from "@/types/product";
+// import { publicFetch } from "@/lib/publicFetch";
+// import { Product } from "@/types/product";
+import { getProductsFromDB } from "@/lib/products";
 // import Link from "next/link";
 
-interface ProductsResponse {
-  products: Product[];
-  total: number;
-};
+// interface ProductsResponse {
+//   products: Product[];
+//   total: number;
+// };
 
-type GetProductsResult = {
-  products: Product[];
-  total: number;
-  error: boolean;
-};
+// type GetProductsResult = {
+//   products: Product[];
+//   total: number;
+//   error: boolean;
+// };
 
 type CollectionSearchParams = {
   page?: string;
@@ -23,30 +24,35 @@ type CollectionSearchParams = {
 };
 
 
-async function getProducts(searchParams: Promise<CollectionSearchParams>): Promise<GetProductsResult> {
-  const page = (await searchParams).page ?? "1";
-  const limit = (await searchParams).limit ?? "12";
-  const sort = (await searchParams).sort ?? "recent";
+// async function getProducts(searchParams: Promise<CollectionSearchParams>): Promise<GetProductsResult> {
+//   const page = (await searchParams).page ?? "1";
+//   const limit = (await searchParams).limit ?? "12";
+//   const sort = (await searchParams).sort ?? "recent";
 
-  const res = await publicFetch<ProductsResponse>(
-    `/products?page=${page}&limit=${limit}&sort=${sort}`,
-    { cache: "no-store" }
-  );
+//   const res = await publicFetch<ProductsResponse>(
+//     `/products?page=${page}&limit=${limit}&sort=${sort}`,
+//     { cache: "no-store" }
+//   );
 
-  if (!res.ok) {
-    console.error(`Failed to fetch products: ${res.status} - ${res.message}`);
-    throw new Error("Failed to fetch products");
-  }
+//   if (!res.ok) {
+//     console.error(`Failed to fetch products: ${res.status} - ${res.message}`);
+//     throw new Error("Failed to fetch products");
+//   }
 
-  return res.data ? { products: res.data.products, total: res.data.total, error: false } : { products: [], total: 0, error: true };
-}
+//   return res.data ? { products: res.data.products, total: res.data.total, error: false } : { products: [], total: 0, error: true };
+// }
 
 
 export default async function CollectionPage({ searchParams }: { searchParams: Promise<CollectionSearchParams> }) {
 
   const params= await searchParams;
 
-  const productsPromise=getProducts(Promise.resolve(params));
+  const page = Number(params.page ?? 1);
+  const limit = Number(params.limit ?? 12);
+  const sort = params.sort ?? "recent";
+
+  const productsPromise = getProductsFromDB(page, limit, sort);
+
 
   return (
     <div className="min-h-screen bg-linear-to-br from-zinc-950 via-zinc-900 to-black px-4 sm:px-10 py-12 text-white">
