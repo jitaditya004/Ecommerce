@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import type { SyntheticEvent } from "react";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -14,7 +15,7 @@ export default function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
   const [showLoader, setShowLoader] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (submitting) return;
 
