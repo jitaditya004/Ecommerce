@@ -8,6 +8,26 @@ import { useRouter } from "next/navigation";
 import {useState} from "react";
 import { InsufficientStockErrorResponse } from "@/types/errors";
 
+type Product = {
+  product_id: number;
+  name: string;
+  price: number;
+  image_url: string | null;
+  stock: number;
+};
+
+type CartItem = {
+  id: number;
+  quantity: number;
+  products: Product;
+};
+
+type CartResponse = {
+  items: CartItem[];
+};
+
+
+
 export default function CartPage() {
   const { user, loading } = useAuth();
   const { items, isLoading, totalPrice } = useCart();
@@ -18,46 +38,105 @@ export default function CartPage() {
   >([]);
 
 
-  const updateQtyMutation = useMutation({
-    mutationFn: async ({
-      id,
-      delta,
-    }: {
-      id: number;
-      delta: number;
-    }) => {
+  // const updateQtyMutation = useMutation({
+  //   mutationFn: async ({
+  //     id,
+  //     delta,
+  //   }: {
+  //     id: number;
+  //     delta: number;
+  //   }) => {
 
+  //     const res = await apifetch("/cart/update", {
+  //       method: "POST",
+  //       body: JSON.stringify({ id, delta }),
+  //     });
+
+  //     if (!res.ok) {
+  //       throw res;
+  //     }
+
+  //     return res.data;
+  //   },
+
+  //   // onSuccess: () => {
+  //   //   queryClient.invalidateQueries({
+  //   //     queryKey: ["cart"],
+  //   //   });
+  //   // },
+
+  //   onMutate: ()=> {
+  //     setStockErrors([]);
+  //   },
+
+
+  //   onSettled: () => {
+  //     queryClient.invalidateQueries({
+  //       queryKey: ["cart"],
+  //     });
+  //   }
+  // });
+
+  const updateQtyMutation = useMutation<
+    unknown,
+    unknown,
+    { id: number; delta: number },
+    { previousCart?: CartResponse }
+  >({
+    mutationFn: async ({ id, delta }) => {
       const res = await apifetch("/cart/update", {
         method: "POST",
         body: JSON.stringify({ id, delta }),
       });
 
-      if (!res.ok) {
-        throw res;
-      }
-
+      if (!res.ok) throw res;
       return res.data;
     },
 
-    // onSuccess: () => {
-    //   queryClient.invalidateQueries({
-    //     queryKey: ["cart"],
-    //   });
-    // },
-
-    onMutate: ()=> {
+    onMutate: async ({ id, delta }) => {
       setStockErrors([]);
+
+      await queryClient.cancelQueries({ queryKey: ["cart"] });
+
+      const previousCart =
+        queryClient.getQueryData<CartResponse>(["cart"]);
+
+      queryClient.setQueryData<CartResponse>(["cart"], (old) => {
+        if (!old) return old;
+
+        const updatedItems = old.items.map((item) => {
+          if (item.id !== id) return item;
+
+          const newQty = item.quantity + delta;
+          if (newQty < 1) return item;
+
+          return {
+            ...item,
+            quantity: newQty,
+          };
+        });
+
+        return {
+          items: updatedItems,
+        };
+      });
+
+      return { previousCart };
     },
 
+    onError: (_err, _vars, context) => {
+      if (context?.previousCart) {
+        queryClient.setQueryData(["cart"], context.previousCart);
+      }
+    },
 
     onSettled: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["cart"],
-      });
-    }
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+    },
   });
 
-  // ---------- Remove item ----------
+
+ 
   const removeItemMutation = useMutation({
     mutationFn: async (id: number) => {
 
