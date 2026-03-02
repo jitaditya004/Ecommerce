@@ -19,10 +19,26 @@ export default function SignupPage() {
   }
 
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    const form = e.currentTarget;
+
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+
     setError("");
     setLoading(true);
+
+    // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // if (!emailRegex.test(email)) {
+    //   setError("Please enter a valid email address");
+    //   setLoading(false);
+    //   return;
+    // }
 
   try{  
     const res = await apifetch<SignUpResponse>("/auth/signup", {
@@ -96,14 +112,18 @@ export default function SignupPage() {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             disabled={success}
+            required
           />
 
           <input
             className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2.5 text-white placeholder-zinc-400 focus:outline-none focus:border-white transition"
             placeholder="Email"
+            type="email"
             value={email}
+            pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
             onChange={(e) => setEmail(e.target.value)}
             disabled={success}
+            required
           />
 
           <input
@@ -113,6 +133,7 @@ export default function SignupPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={success}
+            required
           />
 
         </div>
