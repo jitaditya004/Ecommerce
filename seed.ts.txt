@@ -1,0 +1,157 @@
+import { PrismaClient } from "@prisma/client";
+
+
+
+
+const prisma = new PrismaClient();
+
+async function main() {
+
+    if (process.env.NODE_ENV === "production") {
+        console.log("Seeding disabled in production");
+        return;
+    }
+
+  const user = await prisma.users.upsert({
+    where: { email: "demo@example.com" },
+    update: {},
+    create: {
+      email: "demo@example.com",
+      username: "demo_user",
+      password_hash: "hashedpassword123",
+      fullname: "Demo User",
+      role: "USER",
+      is_email_verified: true,
+    },
+  });
+
+  await prisma.users.upsert({
+    where: { email: "admin@example.com" },
+    update: {},
+    create: {
+      email: "admin@example.com",
+      username: "admin",
+      password_hash: "hashedpassword123",
+      fullname: "Admin",
+      role: "ADMIN",
+      is_email_verified: true,
+    },
+  });
+
+  await prisma.products.createMany({
+    data: [
+      {
+        name: "Mechanical Keyboard",
+        slug: "mechanical-keyboard",
+        description: "RGB mechanical keyboard",
+        price: 4500,
+        stock: 20,
+        image_url: "/images/keyboard.jpg",
+      },
+      {
+        name: "Gaming Mouse",
+        slug: "gaming-mouse",
+        description: "High precision gaming mouse",
+        price: 1800,
+        stock: 50,
+        image_url: "/images/mouse.jpg",
+      },
+      {
+        name: "Gaming Headset",
+        slug: "gaming-headset",
+        description: "Surround sound headset",
+        price: 3200,
+        stock: 15,
+        image_url: "/images/headset.jpg",
+      },
+    ],
+    skipDuplicates: true,
+  });
+
+  const product = await prisma.products.findFirst({
+    where: { slug: "gaming-mouse" },
+  });
+
+  let cart = await prisma.carts.findFirst({
+    where: { user_id: user.user_id },
+  });
+
+  if (!cart) {
+    cart = await prisma.carts.create({
+      data: {
+        user_id: user.user_id,
+      },
+    });
+  }
+
+  if (product) {
+    await prisma.cart_items.upsert({
+      where: {
+        cart_id_product_id: {
+          cart_id: cart.cart_id,
+          product_id: product.product_id,
+        },
+      },
+      update: {},
+      create: {
+        cart_id: cart.cart_id,
+        product_id: product.product_id,
+        quantity: 1,
+      },
+    });
+
+    await prisma.reviews.upsert({
+      where: {
+        product_id_user_id: {
+          product_id: product.product_id,
+          user_id: user.user_id,
+        },
+      },
+      update: {},
+      create: {
+        user_id: user.user_id,
+        product_id: product.product_id,
+        rating: 5,
+        content: "Amazing product!",
+      },
+    });
+
+    const order = await prisma.orders.create({
+      data: {
+        user_id: user.user_id,
+        order_total: product.price,
+        status: "PENDING",
+        payment_status: "UNPAID",
+      },
+    });
+
+    await prisma.order_items.create({
+      data: {
+        order_id: order.order_id,
+        product_id: product.product_id,
+        quantity: 1,
+        price_at_purchase: product.price,
+      },
+    });
+  }
+
+  await prisma.issueReport.create({
+    data: {
+      name: "Test User",
+      email: "test@example.com",
+      message: "Sample issue report",
+      status: "OPEN",
+    },
+  });
+
+  console.log("🌱 Safe seed completed");
+}
+
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

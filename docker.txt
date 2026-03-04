@@ -1,0 +1,61 @@
+docker compose down -v
+docker image prune -a
+
+
+docker compose up --build
+
+
+
+
+
+docker compose down
+
+then:
+
+docker compose build --no-cache
+
+then:
+
+docker compose up
+
+
+
+docker exec -it next_app npx prisma migrate dev
+
+
+
+
+Typical Developer Workflow
+
+Start project:
+
+docker compose up -d
+
+Stop it:
+
+docker compose down
+
+After restart later:
+
+docker compose up -d
+
+Only rebuild if needed:
+
+docker compose up --build
+
+
+
+docker compose build --progress=plain
+
+docker exec -it next_app npx prisma migrate reset
+
+
+docker exec -it next_app npx prisma migrate deploy
+docker exec -it next_app npx prisma db seed
+
+
+
+
+docker compose up
+docker exec -it next_app npx prisma migrate deploy
+docker exec -it next_app npx prisma db seed
