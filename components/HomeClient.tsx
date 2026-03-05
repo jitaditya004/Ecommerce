@@ -26,7 +26,7 @@ const ProductsSkeleton = () => (
 
 export default function HomeClient() {
   return (
-    <main className="relative min-h-screen bg-linear-to-br from-zinc-950 via-zinc-900 to-black text-white overflow-hidden">
+    <main className="relative bg-linear-to-br from-zinc-950 via-zinc-900 to-black text-white overflow-hidden">
 
       <div className="absolute -top-32 -left-32 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl animate-pulse" />
       <div className="absolute top-40 -right-32 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl animate-pulse" />

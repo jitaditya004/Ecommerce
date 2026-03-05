@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function ContactPage() {
   return (
-    <div className="min-h-screen bg-linear-to-br from-zinc-950 via-zinc-900 to-black px-4 sm:px-10 py-16 text-white">
+    <div className=" bg-linear-to-br from-zinc-950 via-zinc-900 to-black px-4 sm:px-10 py-16 text-white">
 
       <div className="max-w-3xl mx-auto text-center mb-12">
         <h1 className="text-4xl font-bold mb-4">
