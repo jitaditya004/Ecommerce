@@ -6,16 +6,26 @@ export default function Controls({ total }: { total: number }) {
   const router = useRouter();
   const params = useSearchParams();
 
-  const page = Number(params.get("page") ?? 1);
+  // const page = Number(params.get("page") ?? 1);
+  
   const limit = Number(params.get("limit") ?? 12);
   const sort = params.get("sort") ?? "recent";
 
-  const totalPages = Math.ceil(total / limit);
+  // const totalPages = Math.ceil(total / limit);
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+
+  const page = Math.min(Number(params.get("page") ?? 1), totalPages || 1);
 
   function update(key: string, value: string) {
     const p = new URLSearchParams(params.toString());
-    p.set(key, value);
-    router.replace(`?${p.toString()}`);
+    // p.set(key, value);
+    if (key === "limit") {
+      p.set("limit", value);
+      p.set("page", "1");
+    } else {
+      p.set(key, value);
+    }
+    router.replace(`?${p.toString()}`,{ scroll: true });
   }
 
   return (
