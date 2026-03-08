@@ -4,6 +4,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { apifetch } from "@/lib/apiFetch";
+import { useEffect } from "react";
 
 export default function PaymentPage() {
   const params = useSearchParams();
@@ -12,6 +13,31 @@ export default function PaymentPage() {
   const orderId = params.get("orderId");
   const [paying, setPaying] = useState(false);
   const queryClient=useQueryClient();
+
+
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ["orders"] });
+    queryClient.invalidateQueries({ queryKey: ["cart"] });
+  }, [ queryClient ]);
+
+
+  const payWithStripe = async () => {
+    try {
+      setPaying(true);
+      const res = await apifetch<{ url: string }>("/payment/create-session", {
+        method: "POST",
+        body: JSON.stringify({ orderId }),
+      });
+
+      if(res.ok){
+        window.location.href = res.data.url
+      }
+    }catch{
+      alert("An error occurred while processing the payment.");
+    }finally {
+      setPaying(false);
+    }
+  };
 
   const payNow = async (method: string) => {
     try {
@@ -64,7 +90,7 @@ export default function PaymentPage() {
         <div className="space-y-4">
 
           <button
-            onClick={() => payNow("CARD")}
+            onClick={payWithStripe}
             disabled={paying}
             className="w-full bg-white text-black py-3 rounded-xl font-medium hover:scale-105 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >

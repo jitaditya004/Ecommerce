@@ -35,3 +35,7 @@ npm install @prisma/adapter-neon @neondatabase/serverless
 npm install prisma@6 @prisma/client@6
 npm install prisma@6.19.2 @prisma/client@6.19.2
 npm install swr
+
+
+npm install stripe
+npm install @stripe/stripe-js
