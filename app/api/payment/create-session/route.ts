@@ -1,13 +1,18 @@
 export const runtime = "nodejs";
 
 import { prisma } from "@/lib/prisma";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 import { NextResponse } from "next/server";
 import { getUserIdFromRequest } from "@/lib/serverAuth";
 
-export async function POST(req: Request) {
-  try {
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
+export async function POST(req: Request) {
+  
+  try {
+    const stripe = getStripe();
+    
     const { orderId } = await req.json();
 
     const userId = await getUserIdFromRequest();
@@ -45,8 +50,8 @@ export async function POST(req: Request) {
       payment_method_types: ["card"],
       line_items,
       mode: "payment",
-      success_url: `http://localhost:3000/success?orderId=${orderId}`,
-      cancel_url: `http://localhost:3000/payment?orderId=${orderId}`,
+      success_url: `${baseUrl}/success?orderId=${orderId}`,
+      cancel_url: `${baseUrl}/payment?orderId=${orderId}`,
       metadata: {
         orderId: String(orderId),
         userId: String(userId),

@@ -1,10 +1,16 @@
+export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-import { stripe } from "@/lib/stripe";
+//add event id to avoid double processing of same event in case of retries
+
+import { getStripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
 
+
+
 export async function POST(req: Request) {
+  const stripe = getStripe();
 
   const body = await req.text();
   const headersList = await headers();
@@ -94,3 +100,5 @@ export async function POST(req: Request) {
 
   return new Response("OK");
 }
+
+
