@@ -223,6 +223,8 @@ export default function CartPage() {
     );
   }
 
+  const isMutating = updateQtyMutation.isPending || checkoutMutation.isPending;
+
   return (
     <div className="min-h-screen bg-linear-to-br from-zinc-950 via-zinc-900 to-black px-4 sm:px-10 py-12 text-white">
 
@@ -276,6 +278,7 @@ export default function CartPage() {
                     type="button"
                     onClick={() => updateQtyMutation.mutate({ id: item.id, delta: -1 })}
                     className="w-8 h-8 rounded-full border border-zinc-700 hover:bg-zinc-800 transition"
+                    disabled={isMutating || item.quantity <= 1}
                   >
                     -
                   </button>
@@ -286,7 +289,7 @@ export default function CartPage() {
 
                   <button
                     type="button"
-                    disabled={item.quantity>=item.products.stock}
+                    disabled={item.quantity>=item.products.stock || isMutating}
                     onClick={() => updateQtyMutation.mutate({ id: item.id, delta: 1 })}
                     className="w-8 h-8 rounded-full border border-zinc-700 hover:bg-zinc-800 transition"
                   >
@@ -318,11 +321,18 @@ export default function CartPage() {
 
           <button
             type="button"
-            disabled={stockErrors.length>0}
+            disabled={stockErrors.length > 0 || checkoutMutation.isPending}
             onClick={() => checkoutMutation.mutate()}
-            className="bg-white text-black px-8 py-3 rounded-full font-medium hover:scale-105 disabled:bg-gray-500 transition"
+            className="bg-white text-black px-8 py-3 rounded-full font-medium hover:scale-105 disabled:bg-gray-500 transition flex items-center justify-center gap-2"
           >
-            Proceed To Checkout
+            {checkoutMutation.isPending ? (
+              <>
+                <span className="animate-spin w-4 h-4 border-2 border-black border-t-transparent rounded-full"></span>
+                Processing...
+              </>
+            ) : (
+              "Proceed To Checkout"
+            )}
           </button>
 
         </div>
