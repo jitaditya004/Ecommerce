@@ -19,3 +19,15 @@ VALUES
 ('Running Shoes', 'running-shoes', 'Lightweight running shoes', 3999.00, 35, 'https://picsum.photos/id/21/600/600'),
 
 ('Smartphone', 'smartphone', 'Latest Android smartphone', 19999.00, 10, 'https://picsum.photos/id/160/600/600');
+
+
+
+
+npx prisma migrate dev --name add-stock-constraint
+
+
+
+
+ALTER TABLE "Product"
+ADD CONSTRAINT stock_non_negative
+CHECK (stock >= 0);

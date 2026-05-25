@@ -39,3 +39,6 @@ npm install swr
 
 npm install stripe
 npm install @stripe/stripe-js
+
+
+npx ts-jest config:init

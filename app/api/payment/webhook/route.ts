@@ -7,7 +7,7 @@ import { getStripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
 
-
+console.log("WEBHOOK HIT");
 
 export async function POST(req: Request) {
   const stripe = getStripe();
@@ -64,9 +64,12 @@ export async function POST(req: Request) {
       }
 
       for (const item of order.order_items) {
-        await tx.products.update({
+        const updated =await tx.products.updateMany({
           where: {
             product_id: item.product_id!,
+            stock:{
+              gte: item.quantity,
+            },
           },
           data: {
             stock: {
@@ -74,7 +77,11 @@ export async function POST(req: Request) {
             },
           },
         });
+        if (updated.count === 0) {
+          throw new Error("Insufficient stock");
+        }
       }
+      
 
       await tx.orders.update({
         where: {

@@ -23,26 +23,23 @@ export default function SuccessPage() {
     }
 
     const verifyOrder = async () => {
-      try {
-        const res = await fetch(`/api/orders/${orderId}`);
+       try {
+          const res = await fetch(`/api/orders/${orderId}`);
 
-        if (!res.ok) {
-          router.replace("/");
-          return;
-        }
+          if (!res.ok) return;
 
-        const data = await res.json();
+          const data = await res.json();
 
-        if (data.payment_status !== "PAID") {
-          router.replace("/");
-          return;
-        }
+          if (data.payment_status === "PAID") {
+            setOrder(data);
+            setLoading(false);
+            return;
+          }
 
-        setOrder(data);
+          setTimeout(verifyOrder, 2000);
+
       } catch {
-        router.replace("/");
-      } finally {
-        setLoading(false);
+          setTimeout(verifyOrder, 2000);
       }
     };
 
