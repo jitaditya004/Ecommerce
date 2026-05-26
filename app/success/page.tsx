@@ -24,7 +24,7 @@ export default function SuccessPage() {
 
     const verifyOrder = async () => {
        try {
-          const res = await fetch(`/api/orders/${orderId}`);
+          const res = await fetch(`/api/order/${orderId}`);
 
           if (!res.ok) return;
 
@@ -36,10 +36,10 @@ export default function SuccessPage() {
             return;
           }
 
-          setTimeout(verifyOrder, 2000);
+          setTimeout(verifyOrder, 100);
 
       } catch {
-          setTimeout(verifyOrder, 2000);
+          setTimeout(verifyOrder, 1000);
       }
     };
 

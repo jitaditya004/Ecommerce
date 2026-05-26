@@ -55,14 +55,6 @@ export default function OrderDetailsPage() {
     );
   }
 
-  if (!data||data.id===undefined) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-zinc-400">
-        Order not found
-      </div>
-    );
-  }
-
     if (isError || !data) {
       return (
         <div className="min-h-screen flex items-center justify-center text-zinc-400">
