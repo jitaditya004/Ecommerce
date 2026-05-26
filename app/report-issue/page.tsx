@@ -43,7 +43,7 @@ export default function ReportIssuePage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-black via-zinc-950 to-zinc-900 px-4">
+    <div className="min-h-[calc(100vh-80px)] flex items-center justify-center bg-linear-to-br from-black via-zinc-950 to-zinc-900 px-4">
       <form
         onSubmit={submit}
         className="w-full max-w-lg bg-zinc-900/70 backdrop-blur-md border border-zinc-800 shadow-2xl rounded-3xl p-8 space-y-6 transition-all"

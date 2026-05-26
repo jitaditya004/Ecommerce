@@ -35,7 +35,6 @@ export async function apifetch<T>(
 
   const isServer = typeof window === "undefined";
 
-
   try {
     const isFormData = options.body instanceof FormData;
 

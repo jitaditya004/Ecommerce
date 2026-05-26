@@ -75,7 +75,7 @@ export default function PaymentPage() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-zinc-950 via-zinc-900 to-black flex items-center justify-center px-4">
+    <div className="min-h-[calc(100vh-80px)] bg-linear-to-br from-zinc-950 via-zinc-900 to-black flex items-center justify-center px-4">
 
       <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 sm:p-10 w-full max-w-md shadow-xl animate-scale-in text-white">
 
@@ -99,18 +99,18 @@ export default function PaymentPage() {
 
           <button
             onClick={() => payNow("UPI")}
-            disabled={paying}
+            disabled={true || paying}
             className="w-full bg-green-500 text-black py-3 rounded-xl font-medium hover:scale-105 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {paying ? "Processing..." : "📱 Pay With UPI"}
+            {paying ? "Processing..." : "📱 Pay With UPI (Out of service)"}
           </button>
 
           <button
             onClick={() => payNow("COD")}
-            disabled={paying}
+            disabled={true || paying}
             className="w-full border border-zinc-700 py-3 rounded-xl font-medium hover:bg-zinc-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {paying ? "Processing..." : "🚚 Cash On Delivery"}
+            {paying ? "Processing..." : "🚚 Cash On Delivery (Out of service)"}
           </button>
 
         </div>

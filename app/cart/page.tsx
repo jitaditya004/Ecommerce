@@ -193,7 +193,7 @@ export default function CartPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-zinc-400 animate-pulse">
+      <div className="min-h-[calc(100vh-80px)] flex items-center justify-center text-zinc-400 animate-pulse">
         Checking session...
       </div>
     );
@@ -201,7 +201,7 @@ export default function CartPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-zinc-400 animate-pulse">
+      <div className="min-h-[calc(100vh-80px)] flex items-center justify-center text-zinc-400 animate-pulse">
         Loading cart...
       </div>
     );
@@ -209,7 +209,7 @@ export default function CartPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-zinc-400">
+      <div className="min-h-[calc(100vh-80px)] flex items-center justify-center text-zinc-400">
         Please login to view your cart
       </div>
     );
@@ -217,7 +217,7 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-zinc-400">
+      <div className="min-h-[calc(100vh-80px)] flex items-center justify-center text-zinc-400">
         Your cart is empty
       </div>
     );
@@ -226,7 +226,7 @@ export default function CartPage() {
   const isMutating = updateQtyMutation.isPending || checkoutMutation.isPending;
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-zinc-950 via-zinc-900 to-black px-4 sm:px-10 py-12 text-white">
+    <div className="min-h-[calc(100vh-80px)] bg-linear-to-br from-zinc-950 via-zinc-900 to-black px-4 sm:px-10 py-12 text-white">
 
       <div className="max-w-5xl mx-auto">
 

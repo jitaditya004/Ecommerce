@@ -42,7 +42,7 @@ export default function OrdersPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-zinc-400 animate-pulse">
+      <div className="min-h-[calc(100vh-80px)] flex items-center justify-center text-zinc-400 animate-pulse">
         Loading orders...
       </div>
     );
@@ -50,14 +50,14 @@ export default function OrdersPage() {
 
   if (isError || !orders || orders.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-zinc-400">
+      <div className="min-h-[calc(100vh-80px)] flex items-center justify-center text-zinc-400">
         No orders found
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-zinc-950 via-zinc-900 to-black px-4 sm:px-8 py-12 text-white">
+    <div className="min-h-[calc(100vh-80px)] bg-linear-to-br from-zinc-950 via-zinc-900 to-black px-4 sm:px-8 py-12 text-white">
 
       <div className="max-w-5xl mx-auto">
 
