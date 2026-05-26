@@ -40,7 +40,7 @@ export default async function ProductPage({
     const imageSrc = product.image_url || "/placeholder.png";
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-zinc-950 via-zinc-900 to-black px-4 sm:px-10 py-12">
+    <div className="min-h-[calc(100vh-80px)] bg-linear-to-br from-zinc-950 via-zinc-900 to-black px-4 sm:px-10 py-12">
 
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
 
