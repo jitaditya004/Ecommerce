@@ -3,8 +3,7 @@
 import { AuthProvider } from "@/context/AuthContext";
 import Navbar from "@/components/Navbar";
 import SearchBar from "@/components/SearchBar";
-// import { CartProvider } from "@/context/CartContext";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 export default function Providers({
@@ -12,9 +11,8 @@ export default function Providers({
 }: {
   children: React.ReactNode;
 }) {
-
-
   const [showSearch, setShowSearch] = useState(false);
+
   const [client] = useState(
     () =>
       new QueryClient({
@@ -29,13 +27,15 @@ export default function Providers({
 
   return (
     <QueryClientProvider client={client}>
-    <AuthProvider>
+      <AuthProvider>
+        <Navbar onToggleSearch={() => setShowSearch((p) => !p)} />
 
-        <Navbar onToggleSearch={() => setShowSearch(p => !p)} />
-        <SearchBar visible={showSearch} />
+        <Suspense fallback={null}>
+          <SearchBar visible={showSearch} />
+        </Suspense>
+
         {children}
-
-    </AuthProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
