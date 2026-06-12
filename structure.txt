@@ -1,3 +1,5 @@
+cd practise/estecomm/ee/ecommerce
+
 my-ecommerce/
 ├── app/
 ├── public/

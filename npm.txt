@@ -42,3 +42,26 @@ npm install @stripe/stripe-js
 
 
 npx ts-jest config:init
+
+
+
+
+
+
+mkdir -p prisma/migrations/00000000000000_init
+npx prisma migrate diff \
+--from-empty \
+--to-schema-datamodel prisma/schema.prisma \
+--script > prisma/migrations/00000000000000_init/migration.sql
+
+npx prisma migrate dev
+npx prisma migrate dev --name added_something
+npx prisma migrate resolve --applied 00000000000000_init
+
+
+npx prisma migrate dev --create-only --name add-product-search-index
+
+put the index create
+
+npx prisma migrate dev
+npx prisma generate

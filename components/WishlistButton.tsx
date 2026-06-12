@@ -1,5 +1,6 @@
 "use client";
 
+import { useHydrated } from "@/hooks/useHydrated";
 import { useWishlist } from "@/hooks/useWishlist";
 import { apifetch } from "@/lib/apiFetch";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -12,59 +13,95 @@ interface WishlistItem {
   image_url?: string | null;
 }
 
-
 type ToggleWishlistResponse = {
   success: true;
-}
+};
 
 export default function WishlistButton({
   productId,
 }: {
   productId: number;
 }) {
+
+  const hydrated = useHydrated();
   const queryClient = useQueryClient();
   const { wishlist } = useWishlist();
-  const {user} = useAuth();
+  const { user } = useAuth();
 
   const isWishlisted = wishlist.some(
-    (item) => item.id === productId
+    item => item.id === productId
   );
 
-  const { mutate,isPending } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: async () => {
-      if(!user) throw new Error("Not authenticated");
-      const res = await apifetch<ToggleWishlistResponse>("/wishlist/toggle", {
-        method: "POST",
-        body: JSON.stringify({ productId }),
-      });
-      if (!res.ok) {
-        throw new Error(res.message);
-      }
+      if (!user) throw new Error("Not authenticated");
+
+      const res = await apifetch<ToggleWishlistResponse>(
+        "/wishlist/toggle",
+        {
+          method: "POST",
+          body: JSON.stringify({ productId }),
+        }
+      );
+
+      if (!res.ok) throw new Error(res.message);
     },
+
     onMutate: async () => {
-      if(!user) return;
-      await queryClient.cancelQueries({ queryKey: ["wishlist"] });
+      if (!user) return;
 
-      const previous= queryClient.getQueryData<WishlistItem[]>(["wishlist"]);
+      await queryClient.cancelQueries({
+        queryKey: ["wishlist"],
+      });
 
-      queryClient.setQueryData<WishlistItem[]>(["wishlist"], (old=[]) => 
-        isWishlisted
-          ? old.filter((item) => item.id !== productId)
-          : [...old, { id: productId } as WishlistItem]
+      const previous =
+        queryClient.getQueryData<WishlistItem[]>([
+          "wishlist",
+        ]);
+
+      queryClient.setQueryData<WishlistItem[]>(
+        ["wishlist"],
+        (old = []) =>
+          isWishlisted
+            ? old.filter(item => item.id !== productId)
+            : [...old, { id: productId }]
       );
 
       return { previous };
     },
+
     onError: (_err, _variables, context) => {
       if (context?.previous) {
-        queryClient.setQueryData<WishlistItem[]>(["wishlist"], context.previous);
+        queryClient.setQueryData(
+          ["wishlist"],
+          context.previous
+        );
       }
     },
+
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["wishlist"] });
+      queryClient.invalidateQueries({
+        queryKey: ["wishlist"],
+      });
     },
   });
 
+  if (!hydrated) {
+    return (
+      <button
+        type="button"
+        disabled
+        aria-label="Toggle Wishlist"
+        className="
+          w-9 h-9 flex items-center justify-center rounded-full
+          bg-black/60 backdrop-blur border border-white/10
+          text-white
+        "
+      >
+        🤍
+      </button>
+    );
+  }
 
   return (
     <button
@@ -76,7 +113,11 @@ export default function WishlistButton({
         w-9 h-9 flex items-center justify-center rounded-full
         bg-black/60 backdrop-blur border border-white/10
         transition transform active:scale-90
-        ${isWishlisted ? "text-red-500 scale-110 animate-pulse" : "text-white hover:scale-110"}
+        ${
+          isWishlisted
+            ? "text-red-500 scale-110 animate-pulse"
+            : "text-white hover:scale-110"
+        }
       `}
     >
       {isWishlisted ? "❤️" : "🤍"}
