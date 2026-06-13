@@ -65,3 +65,13 @@ put the index create
 
 npx prisma migrate dev
 npx prisma generate
+
+
+
+npm install -D vitest @vitejs/plugin-react jsdom @testing-library/react @testing-library/jest-dom
+
+
+
+npx prisma migrate dev --name add_search_fields
+
+npx prisma migrate status

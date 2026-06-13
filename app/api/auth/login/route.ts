@@ -7,6 +7,7 @@ import {
 } from "@/lib/auth";
 import { Role } from "@/types/auth";
 import { COOKIE_NAMES } from "@/types/cookieNames";
+import { hashToken } from "@/helper/SHAhelper";
 
 function isRole(value: unknown): value is Role {
   return value === "USER" || value === "ADMIN";
@@ -17,8 +18,11 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    const email = String(body.email);
-    const password = String(body.password);
+    if (typeof body.email !== "string" || typeof body.password !== "string") {
+      return NextResponse.json({ message: "Invalid input" }, { status: 400 });
+    }
+
+    const { email, password } = body;
 
     //find user with the email
 
@@ -35,7 +39,7 @@ export async function POST(req: Request) {
     //no user 
     if (!user || !isRole(user.role)) {
       return NextResponse.json(
-        { message: "Invalid credentials, User Not Found" },
+        { message: "Invalid credentials" },
         { status: 401 }
       );
     }
@@ -47,7 +51,7 @@ export async function POST(req: Request) {
     
     if (!valid) {
       return NextResponse.json(
-        { message: "Invalid credentials, Wrong Password" },
+        { message: "Invalid credentials" },
         { status: 401 }
       );
     }
@@ -60,21 +64,35 @@ export async function POST(req: Request) {
       name: user.username,
     });
 
-    const refreshToken = createRefreshToken({
-      user_id: user.user_id,
-    });
 
-    const refreshTokenHash = await bcrypt.hash(refreshToken, 10);
 
-    await prisma.refresh_tokens.create({
-      data: {
+    const refreshToken = await prisma.$transaction(async (tx) => {
+      const dbToken = await tx.refresh_tokens.create({
+        data: {
+          user_id: user.user_id,
+          token_hash: "",
+          expires_at: new Date(
+            Date.now() +
+              Number(process.env.REFRESH_TOKEN_EXPIRY || 604800) * 1000,
+          ),
+        },
+      });
+
+      const token = createRefreshToken({
         user_id: user.user_id,
-        token_hash: refreshTokenHash,
-        expires_at: new Date(
-          Date.now() +
-          Number(process.env.REFRESH_TOKEN_EXPIRY || 7 * 24 * 60 * 60) * 1000
-        ),
-      },
+        token_id: dbToken.id,
+      });
+
+      await tx.refresh_tokens.update({
+        where: {
+          id: dbToken.id,
+        },
+        data: {
+          token_hash: hashToken(token),
+        },
+      });
+
+      return token;
     });
 
 

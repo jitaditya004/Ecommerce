@@ -5,12 +5,12 @@ import { prisma } from "@/lib/prisma";
 import { createAccessToken, createRefreshToken } from "@/lib/auth";
 import { Role } from "@/types/auth";
 import { COOKIE_NAMES } from "@/types/cookieNames";
-import bcrypt from "bcryptjs";
+import { hashToken } from "@/helper/SHAhelper";
 const ROTATE_THRESHOLD_SECONDS = 24 * 60 * 60; // 24 hours
-
 
 interface RefreshTokenPayload extends JwtPayload {
   user_id: string;
+  token_id: string;
 }
 
 function isRole(value: unknown): value is Role {
@@ -18,12 +18,9 @@ function isRole(value: unknown): value is Role {
 }
 
 export async function POST() {
-
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get(COOKIE_NAMES.refresh)?.value;
-
-
 
     //if refresh token exists or not
     if (!token) {
@@ -36,16 +33,15 @@ export async function POST() {
     try {
       payload = jwt.verify(
         token,
-        process.env.REFRESH_TOKEN_SECRET!
+        process.env.REFRESH_TOKEN_SECRET!,
       ) as RefreshTokenPayload;
-
-    } catch(err) {
+    } catch (err) {
       console.error("JWT verify failed:", err);
       return NextResponse.json({}, { status: 401 });
     }
 
     //means token is expired
-    if (!payload.user_id) {
+    if (!payload.user_id || !payload.token_id) {
       return NextResponse.json({}, { status: 401 });
     }
 
@@ -68,45 +64,49 @@ export async function POST() {
     }
 
     //check tokens in database
-    //get all tokens from db, with revoked false
-    const dbTokens = await prisma.refresh_tokens.findMany({
+    const matchedToken = await prisma.refresh_tokens.findFirst({
       where: {
+        id: BigInt(payload.token_id),
         user_id: BigInt(payload.user_id),
         revoked: false,
+        token_hash: hashToken(token),
       },
     });
 
-    let matchedToken = null;
+    if (!matchedToken) {
+      return NextResponse.json(
+        { message: "Invalid refresh token" },
+        { status: 401 },
+      );
+    }
 
-      for (const t of dbTokens) {
-        const isMatch = await bcrypt.compare(token, t.token_hash);
+    //
+    if (matchedToken.expires_at < new Date()) {
+      await prisma.refresh_tokens.update({
+        where: {
+          id: matchedToken.id,
+        },
+        data: {
+          revoked: true,
+        },
+      });
 
-        if (isMatch) {
-          matchedToken = t;
-          break;
-        }
-      }
+      return NextResponse.json(
+        { message: "Refresh token expired" },
+        { status: 401 },
+      );
+    }
 
-      //token not in db
-      if (!matchedToken) {
-        return NextResponse.json({ message: "Invalid refresh token" }, { status: 401 });
-      }
+    const now = Date.now();
 
-      //
-      if (matchedToken.expires_at < new Date()) {
-        return NextResponse.json({ message: "Refresh token expired" }, { status: 401 });
-      }
+    const expiresInSeconds = Math.floor(
+      (matchedToken.expires_at.getTime() - now) / 1000,
+    );
 
-      const now = Date.now();
+    //rotate token if closer to expiry
+    const shouldRotate = expiresInSeconds < ROTATE_THRESHOLD_SECONDS;
 
-      const expiresInSeconds =
-        Math.floor((matchedToken.expires_at.getTime() - now) / 1000);
-
-        //rotate token if closer to expiry
-      const shouldRotate =
-        expiresInSeconds < ROTATE_THRESHOLD_SECONDS;
-
-      //create new access token...chnge it later , add access token checks
+    //create new access token...chnge it later , add access token checks
     const accessToken = createAccessToken({
       user_id: user.user_id,
       role: user.role,
@@ -118,40 +118,49 @@ export async function POST() {
     //   user_id: user.user_id,
     // });
 
-
     let refreshTokenToSend = token;
 
     if (shouldRotate) {
-
-      const newRefresh = createRefreshToken({
-        user_id: user.user_id,
-      });
-
-      const newRefreshHash = await bcrypt.hash(newRefresh, 10);
-
-      //set previous token to revoked true
-      await prisma.$transaction([
-        prisma.refresh_tokens.update({
-          where: { id: matchedToken.id },
-          data: { revoked: true },
-        }),
-
-        prisma.refresh_tokens.create({
+      const result = await prisma.$transaction(async (tx) => {
+        const newDbToken = await tx.refresh_tokens.create({
           data: {
             user_id: user.user_id,
-            token_hash: newRefreshHash,
+            token_hash: "",
             expires_at: new Date(
               Date.now() +
-                Number(process.env.REFRESH_TOKEN_EXPIRY || 604800) * 1000
+                Number(process.env.REFRESH_TOKEN_EXPIRY || 604800) * 1000,
             ),
           },
-        }),
-      ]);
+        });
 
-      refreshTokenToSend = newRefresh;
+        const newRefresh = createRefreshToken({
+          user_id: user.user_id,
+          token_id: newDbToken.id,
+        });
+
+        await tx.refresh_tokens.update({
+          where: {
+            id: matchedToken.id,
+          },
+          data: {
+            revoked: true,
+          },
+        });
+
+        await tx.refresh_tokens.update({
+          where: {
+            id: newDbToken.id,
+          },
+          data: {
+            token_hash: hashToken(newRefresh),
+          },
+        });
+
+        return newRefresh;
+      });
+
+      refreshTokenToSend = result;
     }
-
-
 
     const res = NextResponse.json({
       user: {
@@ -161,7 +170,7 @@ export async function POST() {
         name: user.username,
       },
     });
-    res.cookies.set(COOKIE_NAMES.refresh,refreshTokenToSend,{
+    res.cookies.set(COOKIE_NAMES.refresh, refreshTokenToSend, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
@@ -178,11 +187,9 @@ export async function POST() {
     });
 
     return res;
-
   } catch (error) {
-
     console.error("Refresh token error:", error);
 
-    return NextResponse.json({message:"Unauthorized"}, { status: 401 });
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 }

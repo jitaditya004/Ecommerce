@@ -14,6 +14,7 @@ type AccessTokenPayload = {
 
 type RefreshTokenPayload = {
   user_id: string;
+  token_id: string;
 };
 
 export function createAccessToken(user: {
@@ -36,7 +37,9 @@ export function createAccessToken(user: {
 
   const options: SignOptions = {
     algorithm: "HS256",
-    expiresIn: Number(process.env.ACCESS_TOKEN_EXPIRY as SignOptions["expiresIn"]) || "15m",
+    expiresIn: process.env.ACCESS_TOKEN_EXPIRY
+      ? Number(process.env.ACCESS_TOKEN_EXPIRY)
+      : "15m",
   };
 
   return jwt.sign(payload, ACCESS_SECRET, options);
@@ -44,15 +47,22 @@ export function createAccessToken(user: {
 
 export function createRefreshToken(user: {
   user_id: bigint;
+  token_id: bigint;
 }): string {
+  if (!REFRESH_SECRET) {
+    throw new Error("JWT refresh secret not configured");
+  }
 
   const payload: RefreshTokenPayload = {
     user_id: user.user_id.toString(),
+    token_id: user.token_id.toString(),
   };
 
   const options: SignOptions = {
     algorithm: "HS256",
-    expiresIn: Number(process.env.REFRESH_TOKEN_EXPIRY as SignOptions["expiresIn"]) || "7d",
+    expiresIn: process.env.REFRESH_TOKEN_EXPIRY
+      ? Number(process.env.REFRESH_TOKEN_EXPIRY)
+      : "7d",
   };
 
   return jwt.sign(payload, REFRESH_SECRET, options);
